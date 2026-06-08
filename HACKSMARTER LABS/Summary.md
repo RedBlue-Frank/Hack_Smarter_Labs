@@ -12,6 +12,7 @@
 * [Odyssey (Hard)](Odyssey (Hard) - Odyssey 2cb9880185a080fe9836dfca65ce5e4e.md)
 * [PivotSmarter](PivotSmarter 3279880185a0803b8f14d16ba5ade3d5.md)
 * [Range Bitstream](Range Bitstream 3739880185a08080ba34f7be6cb7b149.md)
+* [Range DarkHaven](Range DarkHaven- Range DarkHaven 3379880185a0804988efc33753c6156e.md)
 * [ShadowGate](ShadowGate 35f9880185a0807e9373e9d3d99a45b9.md)
 * [ShareThePain](ShareThePain 3209880185a080f9994dc1e3e013136e.md)
 * [StellarComms (Medium)](StellarComms (Medium) 2f99880185a0803eb34ef0812fe45511.md)
