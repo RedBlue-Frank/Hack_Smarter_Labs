@@ -1,7 +1,7 @@
 # Table of contents
 
 * [Hack\_Smarter\_Labs](README.md)
-* [HACKSMARTER LABS](hacksmarter-labs/README.md)
+* [♻️ HACKSMARTER LABS](hacksmarter-labs/README.md)
   * [ARASAKA](hacksmarter-labs/arasaka.md)
   * [Anomaly](hacksmarter-labs/anomaly.md)
   * [BuildingMagic](hacksmarter-labs/buildingmagic-2bf9880185a08069aa2ada33cca3e770.md)
@@ -18,5 +18,5 @@
   * [StellarComms (Medium)](hacksmarter-labs/stellarcomms-medium-2f99880185a0803eb34ef0812fe45511.md)
   * [Verbose](hacksmarter-labs/verbose-3049880185a080c4b787e1a7cd5b2062.md)
   * [Welcome](hacksmarter-labs/welcome.md)
-* [WEBVERSE LABS](webverse-labs/README.md)
+* [💻 WEBVERSE LABS](webverse-labs/README.md)
   * [Untitled](webverse-labs/untitled.md)
