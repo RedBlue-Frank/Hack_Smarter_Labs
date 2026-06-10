@@ -1,5 +1,3 @@
-# Summary
-
 * [Welcome](Welcome 2ae9880185a0803d9148e8dc24c0516b.md)
 * [ARASAKA](ARASAKA 2b09880185a080be9fd0f25743c870d0.md)
 * [Anomaly](Anomaly 3379880185a080eb826ef52a5e50e500.md)
