@@ -13,6 +13,7 @@
   * [Odyssey (Hard) - Odyssey](hacksmarter-labs/odyssey-hard-odyssey-2cb9880185a080fe9836dfca65ce5e4e.md)
   * [PivotSmarter](hacksmarter-labs/pivotsmarter.md)
   * [Range: Bitstream](hacksmarter-labs/range-bitstream-3739880185a08080ba34f7be6cb7b149.md)
+  * [Range DarkHaven](hacksmarter-labs/range-darkhaven.md)
   * [ShadowGate](hacksmarter-labs/shadowgate.md)
   * [ShareThePain](hacksmarter-labs/sharethepain.md)
   * [StellarComms (Medium)](hacksmarter-labs/stellarcomms-medium-2f99880185a0803eb34ef0812fe45511.md)
