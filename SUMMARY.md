@@ -18,5 +18,6 @@
   * [StellarComms (Medium)](hacksmarter-labs/stellarcomms-medium-2f99880185a0803eb34ef0812fe45511.md)
   * [Verbose](hacksmarter-labs/verbose-3049880185a080c4b787e1a7cd5b2062.md)
   * [Welcome](hacksmarter-labs/welcome.md)
+  * [Range : DarkHaven](hacksmarter-labs/range-darkhaven.md)
 * [💻 WEBVERSE LABS](webverse-labs/README.md)
   * [Untitled](webverse-labs/untitled.md)
