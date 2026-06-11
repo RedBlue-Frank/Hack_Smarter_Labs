@@ -13,11 +13,15 @@
   * [Odyssey (Hard) - Odyssey](hacksmarter-labs/odyssey-hard-odyssey-2cb9880185a080fe9836dfca65ce5e4e.md)
   * [PivotSmarter](hacksmarter-labs/pivotsmarter.md)
   * [Range: Bitstream](hacksmarter-labs/range-bitstream-3739880185a08080ba34f7be6cb7b149.md)
+  * [Range : DarkHaven](hacksmarter-labs/range-darkhaven.md)
   * [ShadowGate](hacksmarter-labs/shadowgate.md)
   * [ShareThePain](hacksmarter-labs/sharethepain.md)
   * [StellarComms (Medium)](hacksmarter-labs/stellarcomms-medium-2f99880185a0803eb34ef0812fe45511.md)
   * [Verbose](hacksmarter-labs/verbose-3049880185a080c4b787e1a7cd5b2062.md)
   * [Welcome](hacksmarter-labs/welcome.md)
-  * [Range : DarkHaven](hacksmarter-labs/range-darkhaven.md)
 * [💻 WEBVERSE LABS](webverse-labs/README.md)
   * [Untitled](webverse-labs/untitled.md)
+
+## WAd
+
+* [Page 1](wad/page-1.md)
