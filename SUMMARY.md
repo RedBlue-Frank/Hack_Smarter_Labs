@@ -21,7 +21,3 @@
   * [Welcome](hacksmarter-labs/welcome.md)
 * [💻 WEBVERSE LABS](webverse-labs/README.md)
   * [Untitled](webverse-labs/untitled.md)
-
-## WAd
-
-* [Page 1](wad/page-1.md)
