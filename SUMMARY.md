@@ -21,5 +21,5 @@
     * [Welcome](readme/hacksmarter-labs/welcome.md)
 * [🖥️ WEBVERSE PRO LABS](webverse-pro-labs/README.md)
   * [Page 2](webverse-pro-labs/page-2.md)
-* [🖱️ HACK THE BOX](hack-the-box.md)
-* [OnlyHacks](onlyhacks.md)
+* [🖱️ HACK THE BOX](hack-the-box/README.md)
+  * [OnlyHacks](hack-the-box/onlyhacks.md)
